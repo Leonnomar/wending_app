@@ -8,7 +8,7 @@ export default function Camera(){
     async function startCamera(){
 
         const stream = await navigator.mediaDevices.getUserMedia({
-            video:true
+            video: { facingMode: "environment" }
         })
 
         videoRef.current.srcObject = stream
@@ -32,7 +32,7 @@ export default function Camera(){
 
             formData.append("photo", blob, "photo.jpg")
 
-            await fetch("http://localhost:5000/upload",{
+            await fetch(`${import.meta.env.VITE_API_URL}/upload`,{
                 method:"POST",
                 body:formData
             })
@@ -54,12 +54,30 @@ export default function Camera(){
             <video
             ref={videoRef}
             autoPlay
-            style={{width:"300px"}}
+            playsInline
+            style={{
+                position:"relative",
+                zIndex:1
+            }}
             />
 
             <br></br>
 
-            <button onClick={takePhoto}>
+            <button 
+            onClick={takePhoto}
+            style={{
+                position:"fixed",
+                bottom:"20px",
+                left:"50%",
+                transform:"translateX(-50%)",
+                background:"#ff4d6d",
+                color:"#fff",
+                border:"none",
+                padding:"15px 25px",
+                borderRadius:"50px",
+                fontSize:"28px",
+                zIndex:9999
+            }}>
                 Tomar foto 📸
             </button>
 

@@ -14,7 +14,7 @@ app.get("/", (req,res)=>{
     res.send("Wedding Gallery API funcionando")
 })
 
-const PORT = 5000
+const PORT = process.env.PORT || 5000
 
 app.listen(PORT,()=>{
     console.log("Servidor corriendo en puerto", PORT)
