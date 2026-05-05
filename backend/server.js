@@ -3,12 +3,18 @@ let comments = {}
 
 const express = require("express")
 const cors = require("cors")
+const fs = require("fs")
+const path = require("path")
+
+if(!fs.existsSync("uploads")){
+    fs.mkdirSync("uploads")
+}
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
-app.use("/uploads", express.static("uploads"))
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 app.get("/", (req,res)=>{
     res.send("Wedding Gallery API funcionando")
@@ -42,8 +48,6 @@ app.post("/upload", upload.single("photo"), (req,res)=>{
     })
 })
 
-const fs = require("fs")
-
 app.get("/photos", (req,res)=>{
 
     fs.readdir("uploads", (err,files)=>{
@@ -55,8 +59,6 @@ app.get("/photos", (req,res)=>{
         res.json(files)
     })
 })
-
-const path = require("path")
 
 app.get("/download/:name", (req,res)=>{
     

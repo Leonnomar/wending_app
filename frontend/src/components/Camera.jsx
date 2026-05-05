@@ -37,7 +37,8 @@ export default function Camera(){
                 body:formData
             })
 
-            console.log("Foto enviada")
+            video.play()
+            alert("Foto subida 📸")
         }, "image/jpeg")
     }
 
@@ -56,6 +57,9 @@ export default function Camera(){
             autoPlay
             playsInline
             style={{
+                width:"100%",
+                height:"100vh",
+                objectFit:"cover",
                 position:"relative",
                 zIndex:1
             }}
