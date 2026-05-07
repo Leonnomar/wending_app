@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import Slideshow from "./Slideshow";
 
 export default function Camera(){
 
@@ -6,6 +7,7 @@ export default function Camera(){
     const canvasRef = useRef()
 
     const [facingMode, setFacingMode] = useState("environment")
+    const [cameraOpen, setCameraOpen] = useState(false)
 
     async function startCamera(){
 
@@ -70,54 +72,95 @@ export default function Camera(){
 
         <div>
 
-            <button onClick={startCamera}>
-                Abrir cámara
-            </button>
-            <button
-            onClick={switchCamera}
-            style={{
-                marginLeft:"10px"
-            }}
-            >
-                🔄 Cambiar cámara
-            </button>
-
-            <br></br>
-
-            <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            style={{
-                width:"100%",
-                height:"100vh",
-                objectFit:"cover",
-                position:"relative",
-                zIndex:1
-            }}
-            />
-
-            <br></br>
-
-            <button 
-            onClick={takePhoto}
-            style={{
+            {/* BOTONES */}
+            <div style={{
                 position:"fixed",
-                bottom:"20px",
-                left:"50%",
-                transform:"translateX(-50%)",
-                background:"#ff4d6d",
-                color:"#fff",
-                border:"none",
-                padding:"15px 25px",
-                borderRadius:"50px",
-                fontSize:"28px",
+                top:"20px",
+                width:"100%",
+                display:"flex",
+                justifyContent:"center",
+                gap:"10px",
                 zIndex:9999
             }}>
-                Tomar foto 📸
-            </button>
 
-            <br></br>
+                {!cameraOpen ? (
+
+                    <button onClick={() => {
+                        setCameraOpen(true)
+                        startCamera()
+                    }}>
+                        Abrir cámara
+                    </button>
+                ) : (
+
+                    <>
+                        <button onClick={switchCamera}>
+                            🔄 Cambiar cámara
+                        </button>
+
+                        <button onClick={() => {
+
+                            const currentStream = videoRef.current.srcObject
+
+                            if(currentStream){
+                                currentStream.getTracks().forEach(track => track.stop())
+                            }
+
+                            setCameraOpen(false)
+                        }}>
+                            Cerrar
+                        </button>
+                    </>
+                
+                )}
+            
+            </div>
+
+            {/* SLIDESHOW O CÁMARA */}
+            {
+                cameraOpen ? (
+
+                    <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    style={{
+                        width:"100%",
+                        height:"100vh",
+                        objectFit:"cover",
+                    }}
+                    />
+            
+                ) : (
+
+                    <Slideshow />
+
+                )
+            }
+
+            {/* BOTÓN FOTO */}
+            {
+                cameraOpen && (
+
+                    <button 
+                    onClick={takePhoto}
+                    style={{
+                        position:"fixed",
+                        bottom:"20px",
+                        left:"50%",
+                        transform:"translateX(-50%)",
+                        background:"#ff4d6d",
+                        color:"#fff",
+                        border:"none",
+                        padding:"15px 25px",
+                        borderRadius:"50px",
+                        fontSize:"28px",
+                        zIndex:9999
+                    }}>
+                        Tomar foto 📸
+                    </button>
+                )
+            }
 
             <canvas
             ref={canvasRef}
