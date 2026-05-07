@@ -9,6 +9,9 @@ export default function Camera(){
     const [facingMode, setFacingMode] = useState("environment")
     const [cameraOpen, setCameraOpen] = useState(false)
 
+    const [countdown, setCountdown] = useState(null)
+    const [flash, setFlash] = useState(false)
+
     async function startCamera(){
 
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -43,29 +46,55 @@ export default function Camera(){
 
     async function takePhoto(){
 
-        const video = videoRef.current
-        const canvas = canvasRef.current
-        const context = canvas.getContext("2d")
+        setCountdown(3)
 
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
+        let counter = 3
 
-        context.drawImage(video,0,0)
+        const interval = setInterval(() => {
 
-        canvas.toBlob(async (blob)=>{
+            counter--
 
-            const formData = new FormData()
+            if(counter > 0){
 
-            formData.append("photo", blob, "photo.jpg")
+                setCountdown(counter)
 
-            await fetch(`${import.meta.env.VITE_API_URL}/upload`,{
-                method:"POST",
-                body:formData
-            })
+            }else{
 
-            video.play()
-            alert("Foto subida 📸")
-        }, "image/jpeg")
+                clearInterval(interval)
+
+                setCountdown(null)
+
+                setFlash(true)
+
+                setTimeout(() => {
+                    setFlash(false)
+                },200)
+
+                const video = videoRef.current
+                const canvas = canvasRef.current
+                const context = canvas.getContext("2d")
+
+                canvas.width = video.videoWidth
+                canvas.height = video.videoHeight
+
+                context.drawImage(video,0,0)
+
+                canvas.toBlob(async (blob)=>{
+
+                    const formData = new FormData()
+
+                    formData.append("photo", blob, "photo.jpg")
+
+                    await fetch(`${import.meta.env.VITE_API_URL}/upload`,{
+                        method:"POST",
+                        body:formData
+                    })
+
+                    alert("Foto subida 📸")
+
+                }, "image/jpeg")
+            }
+        },1000)
     }
 
     return(
@@ -120,17 +149,60 @@ export default function Camera(){
             {
                 cameraOpen ? (
 
-                    <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    style={{
-                        width:"100%",
-                        height:"100vh",
-                        objectFit:"cover",
-                    }}
-                    />
-            
+                    <>
+
+                        <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        style={{
+                            width:"100%",
+                            height:"100vh",
+                            objectFit:"cover",
+                        }}
+                        />
+
+                        {
+                    
+                            countdown && (
+
+                                <div style={{
+                                    position:"fixed",
+                                    top:0,
+                                    left:0,
+                                    width:"100%",
+                                    height:"100%",
+                                    display:"flex",
+                                    justifyContent:"center",
+                                    alignItems:"center",
+                                    fontSize:"120px",
+                                    color:"#fff",
+                                    fontWeight:"bold",
+                                    background:"rgba(0,0,0,0.3)",
+                                    zIndex:9998
+                                }}>
+                                    {countdown}
+                                </div>
+                            )
+                        }
+
+                        {
+                            flash && (
+
+                                <div style={{
+                                    position:"fixed",
+                                    top:0,
+                                    left:0,
+                                    width:"100%",
+                                    height:"100%",
+                                    background:"#fff",
+                                    zIndex:9999
+                                }} />
+                            )
+                        }
+                    
+                    </>
+
                 ) : (
 
                     <Slideshow />
