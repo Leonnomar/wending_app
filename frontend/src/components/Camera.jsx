@@ -1,18 +1,42 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 
 export default function Camera(){
 
     const videoRef = useRef()
     const canvasRef = useRef()
 
+    const [facingMode, setFacingMode] = useState("environment")
+
     async function startCamera(){
 
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
+            video: { facingMode }
         })
 
         videoRef.current.srcObject = stream
 
+    }
+
+    async function switchCamera() {
+
+        const newMode =
+            facingMode === "enviroment"
+            ? "user"
+            : "environment"
+
+        setFacingMode(newMode)
+
+        const currentStream = videoRef.current.srcObject
+
+        if(currentStream){
+            currentStram.getTracks().forEach(track => track.stop())
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: newMode }
+        })
+
+        videoRef.current.srcObject = stream        
     }
 
     async function takePhoto(){
@@ -48,6 +72,14 @@ export default function Camera(){
 
             <button onClick={startCamera}>
                 Abrir cámara
+            </button>
+            <button
+            onClick={switchCamera}
+            style={{
+                marginLeft:"10px"
+            }}
+            >
+                🔄 Cambiar cámara
             </button>
 
             <br></br>
