@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { supabase } from "./supabase";
 
 export default function Gallery(){
 
@@ -26,12 +27,17 @@ export default function Gallery(){
 
         async function loadPhotos() {
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/photos`)
+            const { data, error } = await supabase
+                .from("photos")
+                .select("*")
+                .order("created_at", { ascending:false })
 
-            const data = await res.json()
+            if(error){
+                console.log(error)
+                return
+            }
 
             setPhotos(data)
-        
         }
 
         async function loadLikes(){
@@ -84,7 +90,7 @@ export default function Gallery(){
                     {photos.map((photo,i)=>(
 
                         <div
-                        key={i}
+                        key={photo.id}
                         style={{
                             position:"relative"
                         }}
@@ -93,7 +99,7 @@ export default function Gallery(){
                         <img
                         onMouseOver={(e)=> e.currentTarget.style.transform="scale(1.05)"}
                         onMouseOut={(e)=> e.currentTarget.style.transform="scale(1)"}
-                        src={`${import.meta.env.VITE_API_URL}/uploads/${photo}`}
+                        src={photo.image_url}
                         onClick={()=>{
                             setSelectedPhoto(photo)
                             loadComments(photo)

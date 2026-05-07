@@ -1,5 +1,6 @@
 import { useRef, useState } from "react"
-import Slideshow from "./Slideshow";
+import Slideshow from "./Slideshow"
+import { supabase } from "./supabase"
 
 export default function Camera(){
 
@@ -81,14 +82,38 @@ export default function Camera(){
 
                 canvas.toBlob(async (blob)=>{
 
-                    const formData = new FormData()
+                    const fileName = `${Date.now()}.jpg`
 
-                    formData.append("photo", blob, "photo.jpg")
+                    // SUBIR IMAGEN
+                    const { error: uploadError } = await supabase.storage
+                        .from("photos")
+                        .upload(fileName, blob)
 
-                    await fetch(`${import.meta.env.VITE_API_URL}/upload`,{
-                        method:"POST",
-                        body:formData
-                    })
+                    if(uploadError){
+                        console.log(uploadError)
+                        return
+                    }
+
+                    // OBTENER URL
+                    const { data } = supabase.storage
+                        .from("photos")
+                        .getPublicUrl(fileName)
+
+                    const imageUrl = data.publicUrl
+
+                    // GUARDAR EN DB
+                    const { error: dbError } = await supabase
+                        .from("photos")
+                        .insert([
+                            {
+                                image_url: imageUrl
+                            }
+                        ])
+
+                    if(dbError){
+                        console.log(dbError)
+                        return
+                    }
 
                     alert("Foto subida 📸")
 
