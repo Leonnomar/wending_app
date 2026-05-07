@@ -20,7 +20,7 @@ export default function Camera(){
     async function switchCamera() {
 
         const newMode =
-            facingMode === "enviroment"
+            facingMode === "environment"
             ? "user"
             : "environment"
 
@@ -29,7 +29,7 @@ export default function Camera(){
         const currentStream = videoRef.current.srcObject
 
         if(currentStream){
-            currentStram.getTracks().forEach(track => track.stop())
+            currentStream.getTracks().forEach(track => track.stop())
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({
