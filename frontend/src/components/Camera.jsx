@@ -82,6 +82,8 @@ export default function Camera(){
 
                 canvas.toBlob(async (blob)=>{
 
+                    /**/console.log("Iniciando subida...")
+
                     const fileName = `${Date.now()}.jpg`
 
                     // SUBIR IMAGEN
@@ -89,8 +91,9 @@ export default function Camera(){
                         .from("photos")
                         .upload(fileName, blob)
 
+                    /**/ console.log("Upload error:", uploadError)
+
                     if(uploadError){
-                        console.log(uploadError)
                         return
                     }
 
@@ -99,21 +102,19 @@ export default function Camera(){
                         .from("photos")
                         .getPublicUrl(fileName)
 
-                    const imageUrl = data.publicUrl
+                    console.log("Public URL:", data.publicUrl)
 
                     // GUARDAR EN DB
                     const { error: dbError } = await supabase
                         .from("photos")
                         .insert([
                             {
-                                image_url: imageUrl
+                                image_url: data.publicUrl
                             }
                         ])
 
-                    if(dbError){
-                        console.log(dbError)
-                        return
-                    }
+                    
+                    console.log("DB error", dbError)
 
                     alert("Foto subida 📸")
 
