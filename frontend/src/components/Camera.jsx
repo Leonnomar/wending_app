@@ -82,7 +82,7 @@ export default function Camera(){
 
                 canvas.toBlob(async (blob)=>{
 
-                    /**/console.log("Iniciando subida...")
+                    console.log("Iniciando subida...")
 
                     const fileName = `${Date.now()}.jpg`
 
@@ -91,7 +91,7 @@ export default function Camera(){
                         .from("photos")
                         .upload(fileName, blob)
 
-                    /**/ console.log("Upload error:", uploadError)
+                    console.log("Upload error:", uploadError)
 
                     if(uploadError){
                         return
