@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import Slideshow from "./Slideshow"
-import { supabase } from "./supabase"
+import { supabase } from "../supabase"
 
 export default function Camera(){
 
