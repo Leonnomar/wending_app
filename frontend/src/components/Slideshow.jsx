@@ -42,19 +42,52 @@ export default function Slideshow(){
     },[photos])
 
     if(photos.length === 0){
-        return null
+        return(
+
+            <div style={{
+                height:"100vh",
+                display:"flex",
+                justifyContent:"center",
+                alignItems:"center",
+                fontSize:"24px",
+                opacity:0.7,
+                color:"#fff",
+                background:"#000"
+            }}>
+                Cargando recuerdos ✨
+            </div>
+        )
     }
 
     return(
 
-        <img
-        src={photos[index].image_url}
-        style={{
+        <div style={{
+            position:"relative",
             width:"100%",
             height:"100vh",
-            objectFit:"cover"
-        }}
-        />
+            overflow:"hidden"
+        }}>
+
+            <img
+            src={photos[index].image_url}
+            style={{
+                width:"100%",
+                height:"100%",
+                objectFit:"cover",
+                transition:"opacity 1s ease"
+            }}
+            />
+
+            <div style={{
+                position: "absolute",
+                top:0,
+                left:0,
+                width:"100%",
+                height:"100%",
+                background:"linear-gradient(to top, rgba(0,0,0,0.5), transparent)",
+                zIndex:2
+            }} />
+        </div>
 
     )
 }

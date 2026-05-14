@@ -5,13 +5,13 @@ function App() {
 
   return (
 
-    <div>
-
-      <h1>Galería de la boda</h1>
-
-      <Camera/>
-
-      <Gallery/>
+    <div style={{
+      minHeight:"100vh",
+      background:"linear-gradient(180deg,#0f0f12,#1a1a22)",
+      color:"white"
+    }}>
+      <Camera />
+      <Gallery />
 
     </div>
 

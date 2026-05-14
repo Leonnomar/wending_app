@@ -136,20 +136,51 @@ export default function Camera(){
                 justifyContent:"center",
                 gap:"10px",
                 zIndex:9999
-            }}>
+            }}
+            >
 
                 {!cameraOpen ? (
 
                     <button onClick={() => {
                         setCameraOpen(true)
                         startCamera()
-                    }}>
+                    }}
+                    style={{
+                        background:"linear-gradient(135deg,#ff4d6d,#ff758f)",
+                        color:"#fff",
+                        border:"none",
+                        padding:"12px 22px",
+                        borderRadius:"50px",
+                        fontSize:"16px",
+                        fontWeight:"bold",
+                        cursor:"pointer",
+                        boxShadow:"0 10px 30px rgab(255,77,109,0.35)",
+                        transition:"0.2s"
+                    }}
+                    onMouseOver={(e)=>{
+                        e.currentTarget.style.transform = "scale(1.05)"
+                    }}
+                    onMouseOut={(e)=>{
+                        e.currentTarget.style.transform = "scale(1)"
+                    }}
+                    >
                         Abrir cámara
                     </button>
                 ) : (
 
                     <>
-                        <button onClick={switchCamera}>
+                        <button 
+                        onClick={switchCamera}
+                        style={{
+                            background:"rgba(255,255,255,0.2)",
+                            backdropFilter:"blur(10px)",
+                            color:"#fff",
+                            border:"1px solid rgba(255,255,255,0.3)",
+                            padding:"10px 18px",
+                            borderRadius:"50px",
+                            cursor:"pointer"
+                        }}
+                        >
                             🔄 Cambiar cámara
                         </button>
 
@@ -162,7 +193,16 @@ export default function Camera(){
                             }
 
                             setCameraOpen(false)
-                        }}>
+                        }}
+                        style={{
+                            background:"rgba(0,0,0,0.5)",
+                            color:"#fff",
+                            border:"none",
+                            padding:"10px 18px",
+                            borderRadius:"50px",
+                            cursor:"pointer"
+                        }}
+                        >
                             Cerrar
                         </button>
                     </>
@@ -244,25 +284,26 @@ export default function Camera(){
                     onClick={takePhoto}
                     style={{
                         position:"fixed",
-                        bottom:"20px",
+                        bottom:"30px",
                         left:"50%",
                         transform:"translateX(-50%)",
+                        width:"90px",
+                        height:"90px",
                         background:"#ff4d6d",
-                        color:"#fff",
-                        border:"none",
-                        padding:"15px 25px",
-                        borderRadius:"50px",
-                        fontSize:"28px",
+                        border:"6px solid white",
+                        borderRadius:"50%",
+                        cursor:"pointer",
+                        boxShadow:"0 10px 40px rgba(255,77,109,0.5)",
                         zIndex:9999
                     }}>
-                        Tomar foto 📸
+                        📸
                     </button>
                 )
             }
 
             <canvas
             ref={canvasRef}
-            style={{width:"none"}}
+            style={{display:"none"}}
             />
 
         </div>
