@@ -262,7 +262,7 @@ export default function Camera(){
 
             <canvas
             ref={canvasRef}
-            style={{width:"300px"}}
+            style={{width:"none"}}
             />
 
         </div>

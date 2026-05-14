@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { supabase } from "../supabase"
 
 export default function Slideshow(){
 
@@ -9,8 +10,15 @@ export default function Slideshow(){
 
         async function loadPhotos() {
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/photos`)
-            const data = await res.json()
+            const { data, error } = await supabase
+                .from("photos")
+                .select("*")
+                .order("created_at", { ascending:false })
+
+            if(error){
+                console.log(error)
+                return
+            }
 
             setPhotos(data)
         }
@@ -40,7 +48,7 @@ export default function Slideshow(){
     return(
 
         <img
-        src={`${import.meta.env.VITE_API_URL}/uploads/${photos[index]}`}
+        src={photos[index].image_url}
         style={{
             width:"100%",
             height:"100vh",
