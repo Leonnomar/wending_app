@@ -7,7 +7,9 @@ export default function Gallery(){
     const [selectedPhoto, setSelectedPhoto] = useState(null)
 
     const [comments, setComments] = useState({})
-    const [name, setName] = useState("")
+    const [name, setName] = useState(
+        localStorage.getItem("guest_name") || ""
+    )
     const [text, setText] = useState("")
 
     async function loadComments(photoId) {
@@ -178,6 +180,11 @@ export default function Gallery(){
                                             : p
                                     )
                                 )
+
+                                setSelectedPhoto(prev => ({
+                                    ...prev,
+                                    likes:(prev.likes || 0) + 1
+                                }))
                             }}
                             style={{
                                 position:"absolute",
@@ -247,94 +254,124 @@ export default function Gallery(){
 
                             <div style={{
                                 marginTop:"15px",
-                                maxHeight:"200px",
-                                overflowY:"auto",
-                                textAlign:"left",
-                                color:"#fff"
+                                color:"#fff",
+                                fontSize:"18px",
+                                fontWeight:"bold"
                             }}>
-
-                                {(comments[selectedPhoto.id] || []).map((comment)=>{
-
-                                    <div
-                                    key={comment.id}
-                                    style={{
-                                        marginBottom:"10px",
-                                        padding:"10px",
-                                        background:"rgba(255,255,255,0.05)",
-                                        borderRadius:"10px"
-                                    }}
-                                    >
-                                        <strong>{comment.name}</strong>
-                                        <div>{comment.text}</div>
-                                    </div>
-
-                                })}
-
+                                ❤️ {selectedPhoto.likes || 0} Me gusta
                             </div>
 
                             <div style={{
-                                display:"flex",
-                                gap:"10px",
-                                marginTop:"15px"
+                                marginTop:"20px",
+                                color:"#fff"
                             }}>
 
-                                <input
-                                placeholder="Tu nombre"
-                                value={name}
-                                onChange={(e)=> setName(e.target.value)}
-                                style={{
-                                    flex:1,
-                                    padding:"12px",
-                                    borderRadius:"10px",
-                                    border:"none"
-                                }}
-                                />
+                                {/* COMENTARIOS */}
+                                <div style={{
+                                    maxHeight:"200px",
+                                    overflowY:"auto",
+                                    textAlign:"left",
+                                    marginBottom:"15px"
+                                }}>
 
-                                <input
-                                placeholder="Comentario"
-                                value={text}
-                                onChange={(e)=> setText(e.target.value)}
-                                style={{
-                                    flex:2,
-                                    padding:"12px",
-                                    borderRadius:"10px",
-                                    border:"none"
-                                }}
-                                />
+                                   {(comments[selectedPhoto.id] || []).map((comment)=>(
 
-                                <button
-                                onClick={async ()=>{
+                                        <div
+                                        key={comment.id}
+                                        style={{
+                                            marginBottom:"10px",
+                                            padding:"10px",
+                                            background:"rgba(255,255,255,0.06)",
+                                            borderRadius:"10px"
+                                        }}
+                                        >
+                                            <strong>{comment.name}</strong>
+                                            <div>{comment.text}</div>
+                                        </div>
+
+                                    ))}
+
+                                </div>
+
+                                {/* INPUTS */}
+                                <div style={{
+                                    display:"flex",
+                                    gap:"10px"
+                                }}>
+
+                                    <input
+                                    placeholder="Tu nombre"
+                                    value={name}
+                                    onChange={(e)=>{
+                                        setName(e.target.value)
+
+                                        localStorage.setItem(
+                                            "guest_name",
+                                            e.target.value
+                                        )
+                                    }}
+                                    style={{
+                                        flex:1,
+                                        padding:"12px",
+                                        borderRadius:"10px",
+                                        border:"none"
+                                    }}
+                                    />
+
+                                    <input
+                                    placeholder="Comentario"
+                                    value={text}
+                                    onChange={(e)=> setText(e.target.value)}
+                                    style={{
+                                        flex:2,
+                                        padding:"12px",
+                                        borderRadius:"10px",
+                                        border:"none"
+                                    }}
+                                    />
+
+                                    <button
+                                    onClick={async ()=>{
                                 
-                                    if(!name.trim() || !text.trim()){
-                                        return
-                                    }
+                                        if(!name.trim() || !text.trim()){
+                                            return
+                                        }
 
-                                    await supabase
-                                        .from("comments")
-                                        .insert([
-                                            {
-                                                photo_id: selectedPhoto.id,
-                                                name,
-                                                text
-                                            }
-                                        ])
+                                        const { error } = await supabase
+                                            .from("comments")
+                                            .insert([
+                                                {
+                                                    photo_id: selectedPhoto.id,
+                                                    name,
+                                                    text
+                                                }
+                                            ])
+                                        
+                                        console.log(error)
+
+                                        if (error){
+                                            alert("Error al comentar")
+                                            return
+                                        }
         
-                                    setText("")
+                                        setText("")
 
-                                    loadComments(selectedPhoto.id)
-                                }}
-                                style={{
-                                    background:"#ff4d6d",
-                                    border:"none",
-                                    color:"#fff",
-                                    padding:"0 20px",
-                                    borderRadius:"10px",
-                                    cursor:"pointer"
-                                }}
-                                >
-                                    ➤
-                                </button>
-                            
+                                        loadComments(selectedPhoto.id)
+                                    }}
+                                    style={{
+                                        background:"#ff4d6d",
+                                        border:"none",
+                                        color:"#fff",
+                                        padding:"0 20px",
+                                        borderRadius:"10px",
+                                        cursor:"pointer"
+                                    }}
+                                    >
+                                        ➤
+                                    </button>
+
+                                </div>
+
                             </div>
 
                         </div>
