@@ -5,6 +5,29 @@ export default function Gallery(){
 
     const [photos, setPhotos] = useState([])
     const [selectedPhoto, setSelectedPhoto] = useState(null)
+
+    const [comments, setComments] = useState({})
+    const [name, setName] = useState("")
+    const [text, setText] = useState("")
+
+    async function loadComments(photoId) {
+        
+        const { data, error } = await supabase
+            .from("comments")
+            .select("*")
+            .eq("photo_id", photoId)
+            .order("created_at", { ascending:true })
+
+        if(error){
+            console.log(error)
+            return
+        }
+
+        setComments(prev => ({
+            ...prev,
+            [photoId]: data
+        }))
+    }
     
     useEffect(()=>{
 
@@ -20,7 +43,26 @@ export default function Gallery(){
                 return
             }
 
-            setPhotos(data)
+            const photosWithLikes = await Promise.all(
+
+                data.map(async (photo) => {
+
+                    const { count } = await supabase
+                        .from("likes")
+                        .select("*", {
+                            count:"exact",
+                            head:true
+                        })
+                        .eq("photo_id", photo.id)
+
+                    return {
+                        ...photo,
+                        likes: count || 0
+                    }
+                })
+            )
+
+            setPhotos(photosWithLikes)
         }
 
         loadPhotos()
@@ -52,7 +94,7 @@ export default function Gallery(){
                 fontWeight:"bold",
                 letterSpacing:"2px"
             }}>
-                Sarahi & Emanuel 🌹
+                Emanuel & Sarahi 🌹
             </h1>
 
             <p style={{
@@ -106,16 +148,52 @@ export default function Gallery(){
                             src={photo.image_url}
                             onClick={()=>{
                                 setSelectedPhoto(photo)
+                                loadComments(photo.id)
                             }}
                             style={{
                                 width:"100%",
                                 height:"200px",
                                 objectFit:"cover",
                                 borderRadius:"10px",
-                                transition:"all 0.25s 3ase",
+                                transition:"all 0.25s ease",
                                 cursor:"pointer"
                             }}
                             />
+
+                            <button
+                            onClick={async ()=>{
+
+                                await supabase
+                                    .from("likes")
+                                    .insert([
+                                        {
+                                            photo_id: photo.id
+                                        }
+                                    ])
+                                
+                                setPhotos(prev =>
+                                    prev.map(p =>
+                                        p.id === photo.id
+                                            ? { ...p, likes:(p.likes || 0) + 1 }
+                                            : p
+                                    )
+                                )
+                            }}
+                            style={{
+                                position:"absolute",
+                                bottom:"10px",
+                                right:"10px",
+                                background:"rgba(0,0,0,0.6)",
+                                backdropFilter:"blur(10px)",
+                                border:"none",
+                                color:"#fff",
+                                padding:"8px 12px",
+                                borderRadius:"20px",
+                                cursor:"pointer"
+                            }}
+                            >
+                                ❤️ {photo.likes || 0}
+                            </button>
 
                         </div>
 
@@ -166,6 +244,98 @@ export default function Gallery(){
                                 boxShadow:"0 20px 50px rgba(0,0,0,0.4)"
                             }}
                             />
+
+                            <div style={{
+                                marginTop:"15px",
+                                maxHeight:"200px",
+                                overflowY:"auto",
+                                textAlign:"left",
+                                color:"#fff"
+                            }}>
+
+                                {(comments[selectedPhoto.id] || []).map((comment)=>{
+
+                                    <div
+                                    key={comment.id}
+                                    style={{
+                                        marginBottom:"10px",
+                                        padding:"10px",
+                                        background:"rgba(255,255,255,0.05)",
+                                        borderRadius:"10px"
+                                    }}
+                                    >
+                                        <strong>{comment.name}</strong>
+                                        <div>{comment.text}</div>
+                                    </div>
+
+                                })}
+
+                            </div>
+
+                            <div style={{
+                                display:"flex",
+                                gap:"10px",
+                                marginTop:"15px"
+                            }}>
+
+                                <input
+                                placeholder="Tu nombre"
+                                value={name}
+                                onChange={(e)=> setName(e.target.value)}
+                                style={{
+                                    flex:1,
+                                    padding:"12px",
+                                    borderRadius:"10px",
+                                    border:"none"
+                                }}
+                                />
+
+                                <input
+                                placeholder="Comentario"
+                                value={text}
+                                onChange={(e)=> setText(e.target.value)}
+                                style={{
+                                    flex:2,
+                                    padding:"12px",
+                                    borderRadius:"10px",
+                                    border:"none"
+                                }}
+                                />
+
+                                <button
+                                onClick={async ()=>{
+                                
+                                    if(!name.trim() || !text.trim()){
+                                        return
+                                    }
+
+                                    await supabase
+                                        .from("comments")
+                                        .insert([
+                                            {
+                                                photo_id: selectedPhoto.id,
+                                                name,
+                                                text
+                                            }
+                                        ])
+        
+                                    setText("")
+
+                                    loadComments(selectedPhoto.id)
+                                }}
+                                style={{
+                                    background:"#ff4d6d",
+                                    border:"none",
+                                    color:"#fff",
+                                    padding:"0 20px",
+                                    borderRadius:"10px",
+                                    cursor:"pointer"
+                                }}
+                                >
+                                    ➤
+                                </button>
+                            
+                            </div>
 
                         </div>
                     </div>

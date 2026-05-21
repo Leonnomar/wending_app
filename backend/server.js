@@ -1,6 +1,3 @@
-let likes = {}
-let comments = {}
-
 const express = require("express")
 const cors = require("cors")
 const fs = require("fs")
@@ -68,43 +65,4 @@ app.get("/download/:name", (req,res)=>{
 
     res.download(filePath)
     
-})
-
-app.post("/like/:photo", (req,res)=>{
-
-    const photo = req.params.photo
-
-    if(!likes[photo]){
-        likes[photo] = 0
-    }
-
-    likes[photo]++
-
-    res.json({likes: likes[photo]})
-
-})
-
-app.get("/likes", (req,res)=>{
-    res.json(likes)
-})
-
-app.post("/comment/:photo", (req,res)=>{
-
-    const photo = req.params.photo
-    const { name, text } = req.body
-
-    if(!comments[photo]){
-        comments[photo] = []
-    }
-
-    comments[photo].push({ name, text })
-
-    res.json(comments[photo])
-})
-
-app.get("/comments/:photo", (req,res)=>{
-
-    const photo = req.params.photo
-
-    res.json(comments[photo] || [])
 })
