@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { supabase } from "../supabase";
+import { supabase } from "../supabase"
+import { colors } from "../colors"
 
 export default function Gallery(){
 
@@ -78,13 +79,18 @@ export default function Gallery(){
     },[])
 
     return(
-        <div>
+        <div style={{
+            background: colors.beige,
+            minHeight: "100vh",
+            color: colors.oliveDark
+        }}>
             <div style={{
                 textAlign:"center",
                 paddingTop:"30px",
                 fontSize:"14px",
                 letterSpacing:"4px",
-                opacity:0.6
+                opacity:0.7,
+                color: colors.olive
             }}>
                 WEDDING GALLERY
             </div>
@@ -94,7 +100,8 @@ export default function Gallery(){
                 marginTop:"30px",
                 marginBottom:"10px",
                 fontWeight:"bold",
-                letterSpacing:"2px"
+                letterSpacing:"2px",
+                color: colors.oliveDark
             }}>
                 Emanuel & Sarahi 🌹
             </h1>
@@ -190,13 +197,13 @@ export default function Gallery(){
                                 position:"absolute",
                                 bottom:"10px",
                                 right:"10px",
-                                background:"rgba(0,0,0,0.6)",
-                                backdropFilter:"blur(10px)",
+                                background: colors.olive,
                                 border:"none",
                                 color:"#fff",
                                 padding:"8px 12px",
                                 borderRadius:"20px",
-                                cursor:"pointer"
+                                cursor:"pointer",
+                                boxShadow:"0 5px 15px rgba(79,85,67,0.3)"
                             }}
                             >
                                 ❤️ {photo.likes || 0}
@@ -231,8 +238,8 @@ export default function Gallery(){
                         onClick={(e)=> e.stopPropagation()}
                         style={{
                             background:"rgba(20,20,25,0.95)",
-                            border:"1px solid rgba(255,255,255,0.1)",
-                            boxShadow:"0 20px 60px rgba(0,0,0,0.5)",
+                            border:`1px solid ${colors.oliveLight}`,
+                            boxShadow:"0 20px 60px rgba(79,85,67,0.35)",
                             padding:"20px",
                             borderRadius:"10px",
                             maxWidth:"500px",
@@ -248,7 +255,7 @@ export default function Gallery(){
                                 maxHeight:"60vh",
                                 objectFit:"cover",
                                 borderRadius:"10px",
-                                boxShadow:"0 20px 50px rgba(0,0,0,0.4)"
+                                boxShadow:"0 20px 40px rgba(79,85,67,0.25)"
                             }}
                             />
 

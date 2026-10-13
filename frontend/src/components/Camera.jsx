@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import Slideshow from "./Slideshow"
 import { supabase } from "../supabase"
+import { colors } from "../colors"
 
 export default function Camera(){
 
@@ -146,7 +147,7 @@ export default function Camera(){
                         startCamera()
                     }}
                     style={{
-                        background:"linear-gradient(135deg,#ff4d6d,#ff758f)",
+                        background:`linear-gradient(135deg, ${colors.olive}, ${colors.oliveDark})`,
                         color:"#fff",
                         border:"none",
                         padding:"12px 22px",
@@ -154,7 +155,7 @@ export default function Camera(){
                         fontSize:"16px",
                         fontWeight:"bold",
                         cursor:"pointer",
-                        boxShadow:"0 10px 30px rgab(255,77,109,0.35)",
+                        boxShadow:"0 10px 30px rgba(79,85,67,0.35)",
                         transition:"0.2s"
                     }}
                     onMouseOver={(e)=>{
@@ -172,7 +173,7 @@ export default function Camera(){
                         <button 
                         onClick={switchCamera}
                         style={{
-                            background:"rgba(255,255,255,0.2)",
+                            background:"rgba(107,112,92,0.65)",
                             backdropFilter:"blur(10px)",
                             color:"#fff",
                             border:"1px solid rgba(255,255,255,0.3)",
@@ -289,11 +290,11 @@ export default function Camera(){
                         transform:"translateX(-50%)",
                         width:"90px",
                         height:"90px",
-                        background:"#ff4d6d",
+                        background: colors.olive,
                         border:"6px solid white",
                         borderRadius:"50%",
                         cursor:"pointer",
-                        boxShadow:"0 10px 40px rgba(255,77,109,0.5)",
+                        boxShadow:"0 10px 40px rgba(79,85,67,0.5)",
                         zIndex:9999
                     }}>
                         📸

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../supabase"
+import { colors } from "../colors"
 
 export default function Slideshow(){
 
@@ -51,8 +52,8 @@ export default function Slideshow(){
                 alignItems:"center",
                 fontSize:"24px",
                 opacity:0.7,
-                color:"#fff",
-                background:"#000"
+                color: colors.oliveDark,
+                background: colors.beige
             }}>
                 Cargando recuerdos ✨
             </div>
@@ -84,7 +85,7 @@ export default function Slideshow(){
                 left:0,
                 width:"100%",
                 height:"100%",
-                background:"linear-gradient(to top, rgba(0,0,0,0.5), transparent)",
+                background:"linear-gradient(to top, rgba(79,85,67,0.65), transparent)",
                 zIndex:2
             }} />
         </div>
