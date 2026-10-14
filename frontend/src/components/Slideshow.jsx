@@ -9,6 +9,8 @@ export default function Slideshow(){
 
     useEffect(()=>{
 
+        let active = true
+
         async function loadPhotos() {
 
             const { data, error } = await supabase
@@ -17,77 +19,108 @@ export default function Slideshow(){
                 .order("created_at", { ascending:false })
 
             if(error){
-                console.log(error)
+                console.log("Error al cargar fotos:", error)
                 return
             }
 
-            setPhotos(data)
+            if(active && data){
+
+                setPhotos(prev => {
+
+                    const samePhotos =
+                        prev.length === data.length &&
+                        prev.every((photo, i) =>
+                            photo.id === data[i].id
+                        )
+
+                    return samePhotos ? prev : data
+                })
+            }
         }
 
         loadPhotos()
 
-    },[])
+        const refreshInterval = setInterval(
+            loadPhotos,
+            10000
+        )
 
-    useEffect(()=>{
+        return () => {
+            active = false
+            clearInterval(refreshInterval)
+        }
 
-        const interval = setInterval(()=>{
+    }, [])
 
-            setIndex(prev =>
-                photos.length ? (prev + 1) % photos.length : 0
-            )
+    useEffect(() => {
 
-        },3000)
+        if(photos.length <= 1){
+            return
+        }
 
-        return ()=> clearInterval(interval)
+        const interval = setInterval(() => {
 
-    },[photos])
+            setIndex(prev => (prev + 1) % photos.length)
+
+        }, 4000)
+        
+        return () => clearInterval(interval)
+
+    }, [photos.length])
+
+    const safeIndex = photos.length
+        ? index % photos.length
+        : 0
 
     if(photos.length === 0){
+        
         return(
-
             <div style={{
-                height:"100vh",
-                display:"flex",
-                justifyContent:"center",
-                alignItems:"center",
-                fontSize:"24px",
-                opacity:0.7,
+                minHeight: "350px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "20px",
                 color: colors.oliveDark,
-                background: colors.beige
+                background: colors.beige,
+                borderRadius: "16px"
             }}>
-                Cargando recuerdos ✨
+                Esperando nuevos recuerdos ✨
             </div>
         )
     }
 
     return(
-
         <div style={{
-            position:"relative",
-            width:"100%",
-            height:"100vh",
-            overflow:"hidden"
+            position: "relative",
+            width: "100%",
+            height: "min(65vh, 600px)",
+            minHeight: "300px",
+            overflow: "hidden",
+            borderRadius: "16px",
+            background: colors.beige
         }}>
 
             <img
-            src={photos[index].image_url}
-            style={{
-                width:"100%",
-                height:"100%",
-                objectFit:"cover",
-                transition:"opacity 1s ease"
-            }}
+                key={photos[safeIndex].id}
+                src={photos[safeIndex].image_url}
+                alt="Recuerdo de la boda de Emanuel y Sarahi"
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    transition:"opacity 1s ease"
+                }}
             />
 
             <div style={{
                 position: "absolute",
-                top:0,
-                left:0,
-                width:"100%",
-                height:"100%",
-                background:"linear-gradient(to top, rgba(79,85,67,0.65), transparent)",
-                zIndex:2
+                inset: 0,
+                pointerEvents: "none",
+                background:
+                    "linear-gradient(to top, rgba(79,85,67,0.45), transparent 45%)"
             }} />
+
         </div>
 
     )
