@@ -327,6 +327,27 @@ export default function Gallery(){
                                 >
                                     ❤️ Me gusta
                                 </button>
+                                <a
+                                    href={selectedPhoto.image_url}
+                                    download={`recuerdo-${selectedPhoto.id}.jpg`}
+                                    target="_blank"
+                                    rel="noopener neroferrer"
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        background: colors.beige,
+                                        color: colors.oliveDark,
+                                        border: `1px solid ${colors.oliveLight}`,
+                                        padding: "8px 16px",
+                                        borderRadius: "20px",
+                                        textDecoration: "none",
+                                        fontSize: "15px",
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                    ⬇️ Descargar foto
+                                </a>
                             </div>
 
                             <div style={{
