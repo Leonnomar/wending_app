@@ -183,15 +183,21 @@ export default function Gallery(){
                                 setPhotos(prev =>
                                     prev.map(p =>
                                         p.id === photo.id
-                                            ? { ...p, likes:(p.likes || 0) + 1 }
+                                            ? { ...p, likes: (p.likes || 0) + 1 }
                                             : p
                                     )
                                 )
 
-                                setSelectedPhoto(prev => ({
-                                    ...prev,
-                                    likes:(prev.likes || 0) + 1
-                                }))
+                                setSelectedPhoto(prev => {
+                                    if (!prev || prev.id !== photo.id) {
+                                        return prev
+                                    }
+
+                                    return {
+                                        ...prev,
+                                        likes: (prev.likes || 0) + 1
+                                    }
+                                })
                             }}
                             style={{
                                 position:"absolute",
