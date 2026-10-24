@@ -267,11 +267,66 @@ export default function Gallery(){
 
                             <div style={{
                                 marginTop:"15px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "12px",
                                 color:"#fff",
-                                fontSize:"18px",
-                                fontWeight:"bold"
                             }}>
-                                ❤️ {selectedPhoto.likes || 0} Me gusta
+                                <span style={{
+                                    fontSize: "18px",
+                                    fontWeight: "bold"
+                                }}>
+                                    ❤️ {selectedPhoto.likes || 0} Me gusta
+                                </span>
+
+                                <button
+                                    onClick={async () => {
+                                        const { error } = await supabase
+                                            .from("likes")
+                                            .insert([
+                                                {
+                                                    photo_id: selectedPhoto.id
+                                                }
+                                            ])
+                                        if (error) {
+                                            console.error("Error al dar like:", error)
+                                            alert("No se pudo registrar el like")
+                                            return
+                                        }
+
+                                        setPhotos(prev =>
+                                            prev.map(photo =>
+                                                photo.id === selectedPhoto.id
+                                                    ? {
+                                                        ...photo,
+                                                        likes: (photo.likes || 0) + 1
+                                                    }
+                                                    : photo
+                                            )
+                                        )
+
+                                        setSelectedPhoto (prev => {
+                                            if (!prev) return prev
+
+                                            return {
+                                                ...prev,
+                                                likes: (prev.likes || 0) + 1
+                                            }
+                                        })
+                                    }}
+                                    style={{
+                                        background: colors.olive,
+                                        border: "none",
+                                        color: "#fff",
+                                        padding: "8px 16px",
+                                        borderRadius: "20px",
+                                        cursor: "pointer",
+                                        fontSize: "15px"
+                                    }}
+                                >
+                                    ❤️ Me gusta
+                                </button>
                             </div>
 
                             <div style={{
