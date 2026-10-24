@@ -4,6 +4,32 @@ import { colors } from "../colors"
 
 export default function Gallery(){
 
+    async function downloadPhoto(photo) {
+        try {
+            const response = await fetch(photo.image_url)
+
+            if (!response.ok) {
+                throw new Error("No se pudo obtener la fotografía")
+            }
+
+            const blob = await response.blob()
+            const blobUrl = URL.createObjectURL(blob)
+
+            const link = document.createElement("a")
+            link.href = blobUrl
+            link.download = `recuerdo-${photo.id}.jpg`
+
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+
+            URL.revokeObjectURL(blobUrl)
+        } catch (error) {
+            console.erro("Error al descargar la fotografía:", error)
+            alert("No se pudo descargar la foto. Intenta de nuevo.")
+        }
+    }
+
     const [photos, setPhotos] = useState([])
     const [selectedPhoto, setSelectedPhoto] = useState(null)
 
@@ -328,10 +354,7 @@ export default function Gallery(){
                                     ❤️ Me gusta
                                 </button>
                                 <a
-                                    href={selectedPhoto.image_url}
-                                    download={`recuerdo-${selectedPhoto.id}.jpg`}
-                                    target="_blank"
-                                    rel="noopener neroferrer"
+                                    onClick={() => downloadPhoto(selectedPhoto)}
                                     style={{
                                         display: "inline-flex",
                                         alignItems: "center",
@@ -341,7 +364,7 @@ export default function Gallery(){
                                         border: `1px solid ${colors.oliveLight}`,
                                         padding: "8px 16px",
                                         borderRadius: "20px",
-                                        textDecoration: "none",
+                                        cursor: "pointer",
                                         fontSize: "15px",
                                         fontWeight: "bold"
                                     }}
