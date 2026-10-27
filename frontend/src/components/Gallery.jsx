@@ -9,24 +9,29 @@ export default function Gallery(){
             const response = await fetch(photo.image_url)
 
             if (!response.ok) {
-                throw new Error("No se pudo obtener la fotografía")
+                throw new Error(`Error HTTP: ${response.status}`)
             }
 
             const blob = await response.blob()
             const blobUrl = URL.createObjectURL(blob)
 
+            const urlPath = new URL(photo.image_url).pathname
+            const extension = urlPath.split(".").pop() || (
+                photo.media_type === "video" ? "mp4" : "jpg"
+            )
+
             const link = document.createElement("a")
             link.href = blobUrl
-            link.download = `recuerdo-${photo.id}.jpg`
+            link.download = `recuerdo-${photo.id}.${extension}`
 
             document.body.appendChild(link)
             link.click()
             link.remove()
 
-            URL.revokeObjectURL(blobUrl)
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
         } catch (error) {
-            console.erro("Error al descargar la fotografía:", error)
-            alert("No se pudo descargar la foto. Intenta de nuevo.")
+            console.error("Error al descargar el recuerdo:", error)
+            alert("No se pudo descargar el recuerdo. Intenta de nuevo.")
         }
     }
 
@@ -171,29 +176,69 @@ export default function Gallery(){
                         }}
                         >
                     
-                            <img
-                            onMouseOver={(e)=>{
-                                e.currentTarget.style.transform = "scale(1.03)"
-                                e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)"
-                            }}
-                            onMouseOut={(e)=>{
-                                e.currentTarget.style.transform = "scale(1)"
-                                e.currentTarget.style.boxShadow = "none"
-                            }}
-                            src={photo.image_url}
-                            onClick={()=>{
-                                setSelectedPhoto(photo)
-                                loadComments(photo.id)
-                            }}
-                            style={{
-                                width:"100%",
-                                height:"200px",
-                                objectFit:"cover",
-                                borderRadius:"10px",
-                                transition:"all 0.25s ease",
-                                cursor:"pointer"
-                            }}
-                            />
+                            <div
+                                onClick={() => {
+                                    setSelectedPhoto(photo)
+                                    loadComments(photo.id)
+                                }}
+                                style={{
+                                    position: "relative",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                {photo.media_type === "video" ? (
+                                    <video
+                                        src={photo.image_url}
+                                        muted
+                                        playsInline
+                                        preload="metadata"
+                                        style={{
+                                            width: "100%",
+                                            height: "200px",
+                                            objectFit: "cover",
+                                            borderRadius: "10px",
+                                            background: "#000"
+                                        }}
+                                    />
+                                ) : (
+                                    <img
+                                        src={photo.image_url}
+                                        alt="Recuerdo de la boda de Emanuel y Sarahi"
+                                        onMouseOver={(e)=>{
+                                            e.currentTarget.style.transform = "scale(1.03)"
+                                            e.currentTarget.style.boxShadow =
+                                            "0 20px 40px rgba(0,0,0,0.4)"
+                                        }}
+                                        onMouseOut={(e)=>{
+                                            e.currentTarget.style.transform = "scale(1)"
+                                            e.currentTarget.style.boxShadow = "none"
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            height: "200px",
+                                            objectFit: "cover",
+                                            borderRadius: "10px",
+                                            transition: "all 0.25s ease"
+                                        }}
+                                    />
+                                )}
+
+                                {photo.media_type === "video" && (
+                                    <div style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "#fff",
+                                        fontSize: "42px",
+                                        textShadow: "0 2px 8px #000",
+                                        pointerEvents: "none"
+                                    }}>
+                                        ▶
+                                    </div>
+                                )}
+                            </div>
 
                             <button
                             onClick={async ()=>{
@@ -280,16 +325,34 @@ export default function Gallery(){
                         }}
                         >
 
-                            <img
-                            src={selectedPhoto.image_url}
-                            style={{
-                                width:"100%",
-                                maxHeight:"60vh",
-                                objectFit:"cover",
-                                borderRadius:"10px",
-                                boxShadow:"0 20px 40px rgba(79,85,67,0.25)"
-                            }}
-                            />
+                            {selectedPhoto.media_type === "video" ? (
+                                <video
+                                    key={selectedPhoto.id}
+                                    src={selectedPhoto.image_url}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    style={{
+                                        width: "100%",
+                                        maxHeight: "60vh",
+                                        objectFit: "contain",
+                                        borderRadius: "10px",
+                                        background: "#000"
+                                    }}
+                                />
+                            ) : (
+                                <img
+                                    src={selectedPhoto.image_url}
+                                    alt="Recuerdo de la boda de Emanuel y Sarahi"
+                                    style={{
+                                        width: "100%",
+                                        maxHeight: "60vh",
+                                        objectFit: "contain",
+                                        borderRadius:"10px",
+                                        boxShadow:"0 20px 40px rgba(79,85,67,0.25)"
+                                    }}
+                                />
+                            )}
 
                             <div style={{
                                 marginTop:"15px",
@@ -353,7 +416,7 @@ export default function Gallery(){
                                 >
                                     ❤️ Me gusta
                                 </button>
-                                <a
+                                <button
                                     onClick={() => downloadPhoto(selectedPhoto)}
                                     style={{
                                         display: "inline-flex",
@@ -369,8 +432,8 @@ export default function Gallery(){
                                         fontWeight: "bold"
                                     }}
                                 >
-                                    ⬇️ Descargar foto
-                                </a>
+                                    ⬇️ Descargar {selectedPhoto.media_type === "video" ? "video" : "foto"}
+                                </button>
                             </div>
 
                             <div style={{
