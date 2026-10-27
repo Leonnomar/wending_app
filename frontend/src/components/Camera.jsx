@@ -70,7 +70,7 @@ export default function Camera() {
                 .from("photos")
                 .insert([{
                     image_url: data.publicUrl,
-                    media_Type: mediaType
+                    media_type: mediaType
                 }])
 
             if (dbError) throw dbError
