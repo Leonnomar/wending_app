@@ -33,13 +33,16 @@ export default function Camera() {
 
         const allowedTypes = mediaType === "image"
             ? ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]
-            : ["video/mp4", "video/webm", "video/quicktime", "video/3gpp"]
+            : ["video/mp4", "video/webm", "video/quicktime", "video/3gpp", "video/3gpp2", "video/x-m4v"]
 
-        if (!allowedTypes.includes(file.type)) {
+        const isAllowed = allowedTypes.includes(file.type)
+            || (mediaType === "video" && file.type.startsWith("video/"))
+
+        if (isAllowed) {
             alert(
                 mediaType === "image"
                     ? "Formato de imagen no compatible."
-                    : "Formato de video no compatible. Prueba con MP4 o WebM."
+                    : `Formato de video no compatible: ${file.type || "desconocido"}`
             )
             return
         }
