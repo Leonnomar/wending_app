@@ -241,7 +241,7 @@ export default function Camera() {
                     return
                 }
 
-                const file = new file(
+                const file = new File(
                     [blob],
                     `video-${Date.now()}.${extension}`,
                     { type: recorder.mimeType }
@@ -326,7 +326,7 @@ export default function Camera() {
 
     const buttonStyle = {
         background: colors.olive,
-        colors: "#fff",
+        color: "#fff",
         border: "none",
         padding: "11px 16px",
         borderRadius: "30px",
