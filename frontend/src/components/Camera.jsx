@@ -80,7 +80,17 @@ export default function Camera() {
                 : "¡Video subido! 🎥")
         } catch (error) {
             console.error("Error al subir archivo:", error)
-            alert("No se pudo subir el archivo. Comprueba tu conexión e inténtalo de nuevo.")
+
+            const detail = [
+                error?.message,
+                error?.error,
+                error?.statusCode
+            ].filter(Boolean).join(" | ")
+
+            alert(
+                "Error al subir el archivo:\n" +
+                (detail || JSON.stringify(error))
+            )
         } finally {
             setBusy(false)
         }
@@ -410,9 +420,14 @@ export default function Camera() {
                         muted
                         playsInline
                         style={{
+                            position: "fixed",
+                            inset: 0,
                             width:"100%",
                             height:"100vh",
                             objectFit:"cover",
+                            transform: facingMode === "user" ? "scaleX(-1)" : "none",
+                            background: "#000",
+                            zIndex: 9000
                         }}
                     />
 
