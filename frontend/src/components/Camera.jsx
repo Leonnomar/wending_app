@@ -251,10 +251,17 @@ export default function Camera() {
                 )
 
                 await uploadMedia(file, "video")
+
+                console.log("Grabación terminada:", {
+                    tamaño: blob.size,
+                    tipo: blob.type,
+                    formato: recorder.mimeType
+                })
             }
 
             mediaRecorderRef.current = recorder
             recorder.start(1000)
+            console.log("Grabación iniciada:", recorder.mimeType)
 
             setRecording(true)
             setRecordingSeconds(0)
