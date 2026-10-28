@@ -31,19 +31,13 @@ export default function Camera() {
             return
         }
 
-        const allowedTypes = mediaType === "image"
-            ? ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]
-            : ["video/mp4", "video/webm", "video/quicktime", "video/3gpp", "video/3gpp2", "video/x-m4v"]
+        if (mediaType === "video" && !file.type.toLowerCase().startsWith("video/")) {
+            alert(`El archivo no parece ser un video válido: ${file.type || "tipo desconocido"}`)
+            return
+        }
 
-        const isAllowed = allowedTypes.includes(file.type)
-            || (mediaType === "video" && file.type.startsWith("video/"))
-
-        if (isAllowed) {
-            alert(
-                mediaType === "image"
-                    ? "Formato de imagen no compatible."
-                    : `Formato de video no compatible: ${file.type || "desconocido"}`
-            )
+        if (mediaType === "image" && !file.type.startsWith("image/")) {
+            alert(`El archivo no parece ser una imagen válida: ${file.type || "tipo desconocido"}`)
             return
         }
 
