@@ -196,91 +196,127 @@ export default function Camera() {
     }
 
     async function startRecording() {
-        if (!streamRef.current || busy || recording) return
+        const stream = streamRef.current
+
+        if (!stream || busy || recording) return
 
         if (typeof MediaRecorder === "undefined") {
-            alert("Tu navegador no permite grabar videos con esta función.")
+            alert("Este navegador no permite grabar videos.")
             return
         }
 
         const mimeTypes = [
-            "video/webm;codecs=vp8,opus",
+            "video/webm;codecs=vp8",
             "video/webm",
-            "video/mp4"
+            "video/mp4",
+            "video/quicktime"
         ]
 
         const mimeType = mimeTypes.find(type =>
             MediaRecorder.isTypeSupported(type)
         )
-
-        if (!mimeType) {
-            alert("Este navegador no admite un formato de video compatible.")
-            return
-        }
-
+        
         try {
-            const recorder = new MediaRecorder(streamRef.current, { mimeType })
+            const recorder = mimeType
+                ? new MediaRecorder(stream, { mimeType })
+                : new MediaRecorder(stream)
 
+            mediaRecorderRef.current = recorder
             chunksRef.current = []
 
             recorder.ondataavailable = event => {
                 if (event.data && event.data.size > 0) {
                     chunksRef.current.push(event.data)
+                    console.log("Fragmento de video:", event.data.size)
                 }
+            }
+
+            recorder.onerror = event => {
+                console.error("Error de MediaRecorder:", event.error)
+                alert("El navegador tuvo un problema al grabar el video.")
             }
 
             recorder.onstop = async () => {
                 clearInterval(timerRef.current)
                 clearTimeout(stopTimeoutRef.current)
 
-                const blob = new Blob(chunksRef.current, { type: recorder.mimeType })
-                const extension = recorder.mimeType.includes("mp4") ? "mp4" : "webm"
+                const blobType =
+                    recorder.mimeType ||
+                    chunksRef.current.find(chunk => chunk.type)?.type ||
+                    "video/webm"
+
+                const blob = new Blob(chunksRef.current, {
+                    type: blobType
+                })
+                
+                console.log("Video generado:", {
+                    size: blob.size,
+                    type: blob.type,
+                    chunks: chunksRef.current.length
+                })
 
                 setRecording(false)
                 setRecordingSeconds(0)
 
-                if (blob.size === 0) {
-                    alert("No se pudo crear el video. Inténtalo de nuevo.")
+                if (!blob.size) {
+                    alert("El navegador no generó datos de video. Prueba otro navegador.")
                     return
                 }
+
+                const extension = blobType.includes("mp4")
+                    ? "mp4"
+                    : blobType.includes("quicktime")
+                        ? "mov"
+                        : "webm"
 
                 const file = new File(
                     [blob],
                     `video-${Date.now()}.${extension}`,
-                    { type: recorder.mimeType }
+                    { type: blobType }
                 )
 
                 await uploadMedia(file, "video")
-
-                console.log("Grabación terminada:", {
-                    tamaño: blob.size,
-                    tipo: blob.type,
-                    formato: recorder.mimeType
-                })
             }
 
-            mediaRecorderRef.current = recorder
             recorder.start(1000)
-            console.log("Grabación iniciada:", recorder.mimeType)
+
+            console.log("Grabación iniciada:", {
+                mimeType: recorder.mimeType,
+                    state: recorder.state
+            })
 
             setRecording(true)
             setRecordingSeconds(0)
 
-            let seconds = 0
-
             timerRef.current = setInterval(() => {
-                seconds++
-                setRecordingSeconds(seconds)
+                if (recorder.state === "recording") {
+                    setRecordingSeconds(seconds => {
+                        const next = seconds + 1
+
+                        if (next >= 30){
+                            clearInterval(timerRef.current)
+
+                            if (recorder.state !== "inactive") {
+                                recorder.stop()
+                            }
+
+                            return 30
+                        }
+
+                        return next
+                    })
+               }
             }, 1000)
 
             stopTimeoutRef.current = setTimeout(() => {
-                if (recorder.state !== "inactive") {
+                if (recorder.state !== "inactive"){
                     recorder.stop()
                 }
             }, 30000)
         } catch (error) {
-            console.error("Error al grabar:", error)
-            alert("No se pudo iniciar la grabación.")
+            console.error("No se pudo iniciar la grabación:", error)
+            setRecording(false)
+            alert(`No se pudo iniciar la grabación: ${error.message}`)
         }
     }
 
