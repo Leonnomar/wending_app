@@ -20,25 +20,26 @@ export default function Camera() {
     const [recording, setRecording] = useState(false)
     const [recordingSeconds, setRecordingSeconds] = useState(0)
     const [busy, setBusy] = useState(false)
+    const [pendingMedia, setPendingMedia] = useState(null)
 
     async function uploadMedia(file, mediaType) {
-        if (!file) return
+        if (!file) return false
 
         const maxSize = 50 * 1024 * 1024
 
         if (file.size > maxSize) {
             alert("El archivo supera el límite de 50 MB.")
-            return
+            return false
         }
 
         if (mediaType === "video" && !file.type.toLowerCase().startsWith("video/")) {
             alert(`El archivo no parece ser un video válido: ${file.type || "tipo desconocido"}`)
-            return
+            return false
         }
 
         if (mediaType === "image" && !file.type.startsWith("image/")) {
             alert(`El archivo no parece ser una imagen válida: ${file.type || "tipo desconocido"}`)
-            return
+            return false
         }
 
         setBusy(true)
@@ -75,6 +76,8 @@ export default function Camera() {
             alert(mediaType ===  "image"
                 ? "¡Foto subida! 📸"
                 : "¡Video subido! 🎥")
+            
+            return true
         } catch (error) {
             console.error("Error al subir archivo:", error)
 
@@ -88,6 +91,8 @@ export default function Camera() {
                 "Error al subir el archivo:\n" +
                 (detail || JSON.stringify(error))
             )
+
+            return false
         } finally {
             setBusy(false)
         }
@@ -138,6 +143,16 @@ export default function Camera() {
         await startCamera(newMode)
     }
 
+    function showPreview(file, mediaType) {
+        const url = URL.createObjectURL(file)
+
+        setPendingMedia({
+            file,
+            mediaType,
+            url
+        })
+    }
+
     async function takePhoto(){
         if (!videoRef.current || busy || recording || countdown !== null) return
 
@@ -184,7 +199,7 @@ export default function Camera() {
                     { type: "image/jpeg" }
                 )
 
-                await uploadMedia(file, "image")
+                showPreview(file, "image")
             }, "image/jpeg",0.92)
         },1000)
     }
@@ -269,7 +284,7 @@ export default function Camera() {
                     { type: blobType }
                 )
 
-                await uploadMedia(file, "video")
+                showPreview(file, "video")
             }
 
             recorder.start(1000)
@@ -571,6 +586,103 @@ export default function Camera() {
                 </>
             ) : (
                 <Slideshow />
+            )}
+
+            {pendingMedia && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0,0,0,0.94)",
+                        zIndex: 10001,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "20px",
+                        boxSizing: "border-box",
+                        gap: "20px"
+                    }}
+                >
+                    <h2 style={{color: "#fff", margin: 0 }}>
+                        {pendingMedia.mediaType === "image"
+                            ? "¿Deseas subir tu foto?"
+                            : "¿Deseas subir tu video?"}
+                    </h2>
+
+                    {pendingMedia.mediaType === "image" ? (
+                        <img
+                            src={pendingMedia.url}
+                            alt="Vista previa de la foto"
+                            style={{
+                                maxWidth: "100%",
+                                maxHeight: "65vh",
+                                objectFit: "contain",
+                                borderRadius: "12px"
+                            }}
+                        />
+                    ) : (
+                        <video
+                            src={pendingMedia.url}
+                            controls
+                            playsInline
+                            style={{
+                                maxWidth: "100%",
+                                maxHeight: "65vh",
+                                borderRadius: "12px"
+                            }}
+                        />
+                    )}
+
+                    <p style={{ color: "#fff", textAlign: "center" }}>
+                        Revisa tu recuerdo antes de compartirlo.
+                    </p>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            justifyContent: "center",
+                            gap: "12px"
+                        }}
+                    >
+                        <button
+                            onClick={async () => {
+                                const accepted = pendingMedia
+                                const success = await uploadMedia(
+                                    accepted.file,
+                                    accepted.mediaType
+                                )
+
+                                if (success) {
+                                    URL.revokeObjectURL(accepted.url)
+                                    setPendingMedia(null)
+                                }
+                            }}
+                            disabled={busy}
+                            style={{
+                                ...buttonStyle,
+                                background: colors.olive
+                            }}
+                        >
+                            Subir
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                URL.revokeObjectURL(pendingMedia.url)
+                                setPendingMedia(null)
+                            }}
+                            disabled={busy}
+                            style={{
+                                ...buttonStyle,
+                                background: "#9E3030"
+                            }}
+                        >
+                            Descartar
+                        </button>
+                    </div>
+                </div>
             )}
 
             {busy && (
