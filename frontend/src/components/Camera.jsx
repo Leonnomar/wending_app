@@ -377,58 +377,65 @@ export default function Camera() {
     return(
         <div>
             {/* BOTONES */}
-            <div style={{
-                position: "fixed",
-                top: "20px",
-                left: 0,
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                flexWrap: "wrap",
-                gap: "8px",
-                padding: "0 10px",
-                boxSizing: "border-box",
-                zIndex: 9999
-            }}>
-                {!cameraOpen ? (
-                    <>
-                        <button
-                            onClick={() => {
+            {!cameraOpen ? (
+                <div
+                    style={{
+                        position: "fixed",
+                        right: "20px",
+                        bottom: "24px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "stretch",
+                        gap: "10px",
+                        zIndex: 9999
+                    }}
+                >
+                    <button
+                        onClick={() => {
                             setCameraOpen(true)
                             startCamera()
                         }}
-                            style={buttonStyle}
-                        
-                        >
-                            📸 Abrir cámara
-                        </button>
+                        style={buttonStyle}        
+                    >
+                        📸
+                    </button>
 
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={busy}
-                            style={buttonStyle}
-                        >
-                            🖼️ Subir archivos
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button 
-                            onClick={switchCamera}
-                            disabled={recording || busy}
-                            style={buttonStyle}
-                        >
-                            🔄 Cambiar cámara
-                        </button>
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={busy}
+                        style={buttonStyle}
+                    >
+                        🖼️
+                    </button>
+                </div>
+            ) : (
+                <>
+                    <button 
+                        onClick={switchCamera}
+                        disabled={recording || busy}
+                        style={{
+                            ...buttonStyle,
+                            position: "fixed",
+                            left: "20px",
+                            bottom: "30px",
+                            zIndex: 9999
+                        }}
+                    >
+                        🔄
+                    </button>
 
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={busy || recording}
-                            style={buttonStyle}
-                        >
-                            🖼️ Galería
-                        </button>
-
+                    <div
+                        style={{
+                            position: "fixed",
+                            top: "20px",
+                            right: "20px",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            gap: "10px",
+                            zIndex: 9999
+                        }}
+                    >
                         <button
                             onClick={closeCamera}
                             style={{
@@ -436,11 +443,11 @@ export default function Camera() {
                                 background: colors.oliveDark
                             }}
                         >
-                            Cerrar
+                            ✕
                         </button>
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
 
             <input
                 ref={fileInputRef}
