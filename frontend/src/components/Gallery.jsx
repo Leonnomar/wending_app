@@ -161,10 +161,10 @@ export default function Gallery(){
 
                 <div 
                 style={{
-                    display:"grid",
-                    gridTemplateColumns:"repeat(auto-fill, minmax(200px,1fr))",
-                    gap:"10px",
-                    padding:"20px",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                    gap:"6px",
+                    padding:"10px"
                 }}
                 >
 
@@ -195,9 +195,9 @@ export default function Gallery(){
                                         preload="metadata"
                                         style={{
                                             width: "100%",
-                                            height: "200px",
+                                            aspectRatio: "1 / 1",
                                             objectFit: "cover",
-                                            borderRadius: "10px",
+                                            borderRadius: "6px",
                                             background: "#000"
                                         }}
                                     />
@@ -216,9 +216,9 @@ export default function Gallery(){
                                         }}
                                         style={{
                                             width: "100%",
-                                            height: "200px",
+                                            aspectRatio: "1 / 1",
                                             objectFit: "cover",
-                                            borderRadius: "10px",
+                                            borderRadius: "6px",
                                             transition: "all 0.25s ease"
                                         }}
                                     />
