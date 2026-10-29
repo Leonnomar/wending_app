@@ -134,7 +134,7 @@ export default function Gallery(){
                 letterSpacing:"2px",
                 color: colors.oliveDark
             }}>
-                Emanuel & Sarahi 🌹
+                Emanuel & Sarahi
             </h1>
 
             <p style={{
@@ -153,7 +153,8 @@ export default function Gallery(){
                 <h2 style={{
                     textAlign:"center",
                     marginBottom:"20px",
-                    fontSize:"28px"
+                    fontSize:"28px",
+                    color: colors.oliveLight
                 }}>
                     Galería 📸
                 </h2>
