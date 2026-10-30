@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { supabase } from "../supabase"
 import { colors } from "../colors"
 
@@ -44,7 +44,7 @@ export default function Gallery(){
     )
     const [text, setText] = useState("")
 
-    const [touchStartX, setTouchStartX] = useState(null)
+    const touchStartX = useRef(null)
 
     async function loadComments(photoId) {
         
@@ -329,304 +329,323 @@ export default function Gallery(){
                         zIndex:1000
                     }}
                     >
-
                         <div
-                            onTouchStart={(e) => {
-                                setTouchStartX(e.touches[0].clientX)
-                            }}
-                            onTouchEnd={(e) => {
-                                if (touchStartX === null) return
-
-                                const difference = e.changedTouches[0].clientX - touchStartX
-
-                                if (Math.abs(difference) > 50) {
-                                    if (difference < 0) {
-                                        changePhoto(1)
-                                    } else {
-                                        changePhoto(-1)
-                                    }
-                                }
-
-                                setTouchStartX(null)
-                            }}
+                            onClick={(e) => e.stopPropagation()}
                             style={{
-                                position: "relative",
-                                touchAction: "pan-y"
+                                width: "min(92vw, 700px)",
+                                maxHeight: "90vh",
+                                overflowY: "auto",
+                                padding: "15px",
+                                boxSizing: "border-box",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center"
                             }}
                         >
-                            {selectedPhoto.media_type === "video" ? (
-                                <video
-                                    key={selectedPhoto.id}
-                                    src={selectedPhoto.image_url}
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                    style={{
-                                        width: "100%",
-                                        maxHeight: "60vh",
-                                        objectFit: "contain",
-                                        borderRadius: "10px",
-                                        background: "#000"
-                                    }}
-                                />
-                            ) : (
-                                <img
-                                    src={selectedPhoto.image_url}
-                                    alt="Recuerdo de la boda de Emanuel y Sarahi"
-                                    style={{
-                                        width: "100%",
-                                        maxHeight: "60vh",
-                                        objectFit: "contain",
-                                        borderRadius:"10px",
-                                        boxShadow:"0 20px 40px rgba(79,85,67,0.25)"
-                                    }}
-                                />
-                            )}
-
-                            {/* FLECHA ANTERIOR */}
-                            <button
-                                onClick={() => changePhoto(-1)}
-                                style={{
-                                    position: "absolute",
-                                    left: "8px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    background: "rgba(0,0,0,0.55)",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "50%",
-                                    width: "42px",
-                                    height: "42px",
-                                    fontSize: "25px",
-                                    cursor: "pointer"
+                            <div
+                                onTouchStart={(e) => {
+                                    touchStartX.current = e.touches[0].clientX
                                 }}
-                            >
-                                ‹
-                            </button>
+                                onTouchEnd={(e) => {
+                                    if (touchStartX.current === null) return
 
-                            {/* FLECHA SIGUIENTE */}
-                            <button
-                                onClick={() => changePhoto(1)}
-                                style={{
-                                    position: "absolute",
-                                    right: "8px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    background: "rgba(0,0,0,0.55)",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "50%",
-                                    width: "42px",
-                                    height: "42px",
-                                    fontSize: "25px",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                ›
-                            </button>
-                        </div>
+                                    const difference = e.changedTouches[0].clientX - touchStartX.current
 
-                        <p style={{
-                            color: "#fff",
-                            opacity: 0.7,
-                            fontSize: "13px",
-                            marginTop: "8px"
-                        }}>
-                            {photos.findIndex(p => p.id === selectedPhoto.id) + 1}
-                            {" / "}
-                            {photos.length}
-                        </p>
-
-                        <div style={{
-                            marginTop:"15px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "12px",
-                            color:"#fff",
-                        }}>
-                            <span style={{
-                                fontSize: "18px",
-                                fontWeight: "bold"
-                            }}>
-                                ❤️ {selectedPhoto.likes || 0} Me gusta
-                            </span>
-
-                            <button
-                                onClick={async () => {
-                                    const { error } = await supabase
-                                        .from("likes")
-                                        .insert([
-                                            {
-                                                photo_id: selectedPhoto.id
-                                            }
-                                        ])
-                                    if (error) {
-                                        console.error("Error al dar like:", error)
-                                        alert("No se pudo registrar el like")
-                                        return
+                                    if (Math.abs(difference) > 50) {
+                                        if (difference < 0) {
+                                            changePhoto(1)
+                                        } else {
+                                            changePhoto(-1)
+                                        }
                                     }
 
-                                    setPhotos(prev =>
-                                        prev.map(photo =>
-                                            photo.id === selectedPhoto.id
-                                                ? {
-                                                    ...photo,
-                                                    likes: (photo.likes || 0) + 1
-                                                }
-                                                : photo
-                                        )
-                                    )
-
-                                    setSelectedPhoto (prev => {
-                                        if (!prev) return prev
-
-                                        return {
-                                            ...prev,
-                                            likes: (prev.likes || 0) + 1
-                                        }
-                                    })
+                                    touchStartX.current = null
                                 }}
                                 style={{
-                                    background: colors.olive,
-                                    border: "none",
-                                    color: "#fff",
-                                    padding: "8px 16px",
-                                    borderRadius: "20px",
-                                    cursor: "pointer",
-                                    fontSize: "15px"
-                                }}
-                            >
-                                ❤️ Me gusta
-                            </button>
-                            <button
-                                onClick={() => downloadPhoto(selectedPhoto)}
-                                style={{
-                                    display: "inline-flex",
+                                    position: "relative",
+                                    width: "100%",
+                                    maxWidth: "650px",
+                                    display: "flex",
+                                    justifyContent: "center",
                                     alignItems: "center",
-                                    gap: "8px",
-                                    background: colors.beige,
-                                    color: colors.oliveDark,
-                                    border: `1px solid ${colors.oliveLight}`,
-                                    padding: "8px 16px",
-                                    borderRadius: "20px",
-                                    cursor: "pointer",
-                                    fontSize: "15px",
-                                    fontWeight: "bold"
+                                    touchAction: "pan-y"
                                 }}
                             >
-                                ⬇️ Descargar {selectedPhoto.media_type === "video" ? "video" : "foto"}
-                            </button>
-                        </div>
+                                {selectedPhoto.media_type === "video" ? (
+                                    <video
+                                        key={selectedPhoto.id}
+                                        src={selectedPhoto.image_url}
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        style={{
+                                            width: "100%",
+                                            maxHeight: "60vh",
+                                            objectFit: "contain",
+                                            borderRadius: "10px",
+                                            background: "#000"
+                                        }}
+                                    />
+                                ) : (
+                                    <img
+                                        src={selectedPhoto.image_url}
+                                        alt="Recuerdo de la boda de Emanuel y Sarahi"
+                                        style={{
+                                            width: "100%",
+                                            maxHeight: "60vh",
+                                            objectFit: "contain",
+                                            borderRadius:"10px",
+                                            boxShadow:"0 20px 40px rgba(79,85,67,0.25)"
+                                        }}
+                                    />
+                                )}
 
-                        <div style={{
-                            marginTop:"20px",
-                            color:"#fff"
-                        }}>
-
-                            {/* COMENTARIOS */}
-                            <div style={{
-                                maxHeight:"200px",
-                                overflowY:"auto",
-                                textAlign:"left",
-                                marginBottom:"15px"
-                            }}>
-
-                                {(comments[selectedPhoto.id] || []).map((comment)=>(
-
-                                    <div
-                                    key={comment.id}
+                                {/* FLECHA ANTERIOR */}
+                                <button
+                                    onClick={() => changePhoto(-1)}
                                     style={{
-                                        marginBottom:"10px",
-                                        padding:"10px",
-                                        background:"rgba(255,255,255,0.06)",
-                                        borderRadius:"10px"
+                                        position: "absolute",
+                                        left: "8px",
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        background: "rgba(0,0,0,0.55)",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "50%",
+                                        width: "42px",
+                                        height: "42px",
+                                        fontSize: "25px",
+                                        cursor: "pointer"
                                     }}
-                                    >
-                                        <strong>{comment.name}</strong>
-                                        <div>{comment.text}</div>
-                                    </div>
+                                >
+                                    ‹
+                                </button>
 
-                                ))}
-
+                                {/* FLECHA SIGUIENTE */}
+                                <button
+                                    onClick={() => changePhoto(1)}
+                                    style={{
+                                        position: "absolute",
+                                        right: "8px",
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        background: "rgba(0,0,0,0.55)",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "50%",
+                                        width: "42px",
+                                        height: "42px",
+                                        fontSize: "25px",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    ›
+                                </button>
                             </div>
 
-                            {/* INPUTS */}
-                            <div style={{
-                                display:"flex",
-                                gap:"10px"
+                            <p style={{
+                                color: "#fff",
+                                opacity: 0.7,
+                                fontSize: "13px",
+                                marginTop: "8px"
                             }}>
+                                {photos.findIndex(p => p.id === selectedPhoto.id) + 1}
+                                {" / "}
+                                {photos.length}
+                            </p>
 
-                                <input
-                                placeholder="Tu nombre"
-                                value={name}
-                                onChange={(e)=>{
-                                    setName(e.target.value)
-
-                                    localStorage.setItem(
-                                        "guest_name",
-                                        e.target.value
-                                    )
-                                }}
-                                style={{
-                                    flex:1,
-                                    padding:"12px",
-                                    borderRadius:"10px",
-                                    border:"none"
-                                }}
-                                />
-
-                                <input
-                                placeholder="Comentario"
-                                value={text}
-                                onChange={(e)=> setText(e.target.value)}
-                                style={{
-                                    flex:2,
-                                    padding:"12px",
-                                    borderRadius:"10px",
-                                    border:"none"
-                                }}
-                                />
+                            <div style={{
+                                marginTop:"15px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "12px",
+                                color:"#fff",
+                            }}>
+                                <span style={{
+                                    fontSize: "18px",
+                                    fontWeight: "bold"
+                                }}>
+                                    ❤️ {selectedPhoto.likes || 0} Me gusta
+                                </span>
 
                                 <button
-                                onClick={async ()=>{
-                            
-                                    if(!name.trim() || !text.trim()){
-                                        return
-                                    }
+                                    onClick={async () => {
+                                        const { error } = await supabase
+                                            .from("likes")
+                                            .insert([
+                                                {
+                                                    photo_id: selectedPhoto.id
+                                                }
+                                            ])
+                                        if (error) {
+                                            console.error("Error al dar like:", error)
+                                            alert("No se pudo registrar el like")
+                                            return
+                                        }
 
-                                    const { error } = await supabase
-                                        .from("comments")
-                                        .insert([
-                                            {
-                                                photo_id: selectedPhoto.id,
-                                                name,
-                                                text
+                                        setPhotos(prev =>
+                                            prev.map(photo =>
+                                                photo.id === selectedPhoto.id
+                                                    ? {
+                                                        ...photo,
+                                                        likes: (photo.likes || 0) + 1
+                                                    }
+                                                    : photo
+                                            )
+                                        )
+
+                                        setSelectedPhoto (prev => {
+                                            if (!prev) return prev
+
+                                            return {
+                                                ...prev,
+                                                likes: (prev.likes || 0) + 1
                                             }
-                                        ])
-                                    
-                                    console.log(error)
-
-                                    if (error){
-                                        alert("Error al comentar")
-                                        return
-                                    }
-    
-                                    setText("")
-
-                                    loadComments(selectedPhoto.id)
-                                }}
-                                style={{
-                                    background:"#ff4d6d",
-                                    border:"none",
-                                    color:"#fff",
-                                    padding:"0 20px",
-                                    borderRadius:"10px",
-                                    cursor:"pointer"
-                                }}
+                                        })
+                                    }}
+                                    style={{
+                                        background: colors.olive,
+                                        border: "none",
+                                        color: "#fff",
+                                        padding: "8px 16px",
+                                        borderRadius: "20px",
+                                        cursor: "pointer",
+                                        fontSize: "15px"
+                                    }}
                                 >
-                                    ➤
+                                    ❤️ Me gusta
                                 </button>
+                                <button
+                                    onClick={() => downloadPhoto(selectedPhoto)}
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        background: colors.beige,
+                                        color: colors.oliveDark,
+                                        border: `1px solid ${colors.oliveLight}`,
+                                        padding: "8px 16px",
+                                        borderRadius: "20px",
+                                        cursor: "pointer",
+                                        fontSize: "15px",
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                    ⬇️ Descargar {selectedPhoto.media_type === "video" ? "video" : "foto"}
+                                </button>
+                            </div>
+
+                            <div style={{
+                                marginTop:"20px",
+                                color:"#fff"
+                            }}>
+
+                                {/* COMENTARIOS */}
+                                <div style={{
+                                    maxHeight:"200px",
+                                    overflowY:"auto",
+                                    textAlign:"left",
+                                    marginBottom:"15px"
+                                }}>
+
+                                    {(comments[selectedPhoto.id] || []).map((comment)=>(
+
+                                        <div
+                                        key={comment.id}
+                                        style={{
+                                            marginBottom:"10px",
+                                            padding:"10px",
+                                            background:"rgba(255,255,255,0.06)",
+                                            borderRadius:"10px"
+                                        }}
+                                        >
+                                            <strong>{comment.name}</strong>
+                                            <div>{comment.text}</div>
+                                        </div>
+
+                                    ))}
+
+                                </div>
+
+                                {/* INPUTS */}
+                                <div style={{
+                                    display:"flex",
+                                    gap:"10px"
+                                }}>
+
+                                    <input
+                                    placeholder="Tu nombre"
+                                    value={name}
+                                    onChange={(e)=>{
+                                        setName(e.target.value)
+
+                                        localStorage.setItem(
+                                            "guest_name",
+                                            e.target.value
+                                        )
+                                    }}
+                                    style={{
+                                        flex:1,
+                                        padding:"12px",
+                                        borderRadius:"10px",
+                                        border:"none"
+                                    }}
+                                    />
+
+                                    <input
+                                    placeholder="Comentario"
+                                    value={text}
+                                    onChange={(e)=> setText(e.target.value)}
+                                    style={{
+                                        flex:2,
+                                        padding:"12px",
+                                        borderRadius:"10px",
+                                        border:"none"
+                                    }}
+                                    />
+
+                                    <button
+                                    onClick={async ()=>{
+                                
+                                        if(!name.trim() || !text.trim()){
+                                            return
+                                        }
+
+                                        const { error } = await supabase
+                                            .from("comments")
+                                            .insert([
+                                                {
+                                                    photo_id: selectedPhoto.id,
+                                                    name,
+                                                    text
+                                                }
+                                            ])
+                                        
+                                        console.log(error)
+
+                                        if (error){
+                                            alert("Error al comentar")
+                                            return
+                                        }
+        
+                                        setText("")
+
+                                        loadComments(selectedPhoto.id)
+                                    }}
+                                    style={{
+                                        background:"#ff4d6d",
+                                        border:"none",
+                                        color:"#fff",
+                                        padding:"0 20px",
+                                        borderRadius:"10px",
+                                        cursor:"pointer"
+                                    }}
+                                    >
+                                        ➤
+                                    </button>
+
+                                </div>
 
                             </div>
 
