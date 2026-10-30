@@ -46,6 +46,41 @@ export default function Gallery(){
 
     const touchStartX = useRef(null)
 
+    useEffect(() => {
+        if (!selectedPhoto) return
+
+        window.history.pushState(
+            { photoViewer: true },
+            ""
+        )
+
+        const handleBack = () => {
+            setSelectedPhoto(null)
+        }
+
+        window.addEventListener("popstate", handleBack)
+
+        return () => {
+            window.removeEventListener("popstate", handleBack)
+        }
+    }, [selectedPhoto])
+
+    useEffect(() => {
+        if (!selectedPhoto) return
+
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                setSelectedPhoto(null)
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown)
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [selectedPhoto])
+
     async function loadComments(photoId) {
         
         const { data, error } = await supabase
