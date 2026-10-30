@@ -179,12 +179,12 @@ export default function Gallery(){
                 WEDDING GALLERY
             </div>
             <h1 style={{
-                textAlign:"center",
-                fontSize:"52px",
-                marginTop:"30px",
-                marginBottom:"10px",
-                fontWeight:"bold",
-                letterSpacing:"2px",
+                textAlign: "center",
+                fontSize: "clamp(28px, 8vw, 52px",
+                lineHeight: "1.15",
+                margin: "20px 10px",
+                fontWeight: "bold",
+                letterSpacing: "0px",
                 color: colors.oliveDark
             }}>
                 Emanuel & Sarahi
