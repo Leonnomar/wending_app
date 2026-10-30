@@ -180,11 +180,12 @@ export default function Gallery(){
             </div>
             <h1 style={{
                 textAlign: "center",
-                fontSize: "clamp(28px, 8vw, 52px",
-                lineHeight: "1.15",
+                fontFamily: "'Great Vibes', cursive",
+                fontSize: "clamp(42px, 9vw, 76px)",
+                lineHeight: "1.3",
                 margin: "20px 10px",
-                fontWeight: "bold",
-                letterSpacing: "0px",
+                fontWeight: "normal",
+                letterSpacing: "0",
                 color: colors.oliveDark
             }}>
                 Emanuel & Sarahi
