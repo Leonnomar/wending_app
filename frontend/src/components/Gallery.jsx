@@ -164,7 +164,11 @@ export default function Gallery(){
 
     return(
         <div style={{
-            background: colors.beige,
+            backgroundImage: "url('/eucalyptus-background.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            backgroundRepeat: "no-repeat",
+            backgroundAttachment: "fixed",
             minHeight: "100vh",
             color: colors.oliveDark
         }}>
