@@ -170,7 +170,7 @@ export default function Gallery(){
         }}>
             <div style={{
                 backgroundImage: "url('/eucalyptus-background.jpg')",
-                backgroundSize: "100% 100%",
+                backgroundSize: "cover",
                 backgroundPosition: "center top",
                 backgroundRepeat: "no-repeat",
                 backgroundAttachment: "scroll",
