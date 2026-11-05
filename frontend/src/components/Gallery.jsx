@@ -169,7 +169,7 @@ export default function Gallery(){
             color: colors.oliveDark
         }}>
             <div style={{
-                backgroundImage: "url('/eucalyptus-background.png')",
+                backgroundImage: "url('/eucalyptus-background.jpg')",
                 backgroundSize: "100% 100%",
                 backgroundPosition: "center top",
                 backgroundRepeat: "no-repeat",
