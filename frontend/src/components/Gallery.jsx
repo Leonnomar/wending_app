@@ -173,7 +173,7 @@ export default function Gallery(){
                 backgroundSize: "cover",
                 backgroundPosition: "center top",
                 backgroundRepeat: "no-repeat",
-                backgroundAttachment: "scroll",
+                backgroundAttachment: "fixed",
                 minHeight: "100vh"
             }}>
                 <div style={{
