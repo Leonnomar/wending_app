@@ -164,6 +164,8 @@ export default function Gallery(){
 
     return(
         <div style={{
+            position: "relative",
+            isolation: "isolate",
             backgroundImage: "url('/eucalyptus-background.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center top",
@@ -172,12 +174,30 @@ export default function Gallery(){
             minHeight: "100vh",
             color: colors.oliveDark
         }}>
+            <div
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "280px",
+                    backgroundImage: "url('/eucalyptus-backgroung.jpg')",
+                    backgroundSize: "100% auto",
+                    backgroundPosition: "center top",
+                    backgroundRepeat: "no-repeat",
+                    mixBlendMode: "multiply",
+                    pointerEvents: "none",
+                    zIndex: 2
+                }}
+            />
             <div style={{
                 textAlign:"center",
                 paddingTop:"30px",
                 fontSize:"14px",
                 letterSpacing:"4px",
                 opacity:0.7,
+                position: "relative",
+                zIndex: 1,
                 color: colors.olive
             }}>
                 WEDDING GALLERY
