@@ -158,19 +158,23 @@ export default function Camera() {
         }
     }
 
-    function switchCamera() {
+    async function switchCamera() {
         if (recording) {
             alert("Detén la grabación antes de cambiar la cámara.")
             return
         }
 
-        setFacingMode(current => {
-            const newMode = current === "user" ? "environment" : "user"
+        const newMode = facingMode === "user"
+            ? "environment"
+            : "user"
 
-            console.log("Cambiando cámara:", current, "->", newMode)
+        console.log("Solicitando cambio a:", newMode)
 
-            return newMode
-        })
+        setFacingMode(newMode)
+
+        stopCamera()
+
+        await startCamera(newMode)
     }
 
     useEffect(() => {
@@ -181,7 +185,7 @@ export default function Camera() {
         return () => {
             stopCamera()
         }
-    }, [cameraOpen, facingMode])
+    }, [cameraOpen])
 
     function showPreview(file, mediaType) {
         const url = URL.createObjectURL(file)
