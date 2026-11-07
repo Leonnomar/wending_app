@@ -14,7 +14,7 @@ export default function Camera() {
     const timerRef = useRef(null)
     const stopTimeoutRef = useRef(null)
 
-    const [facingMode, setFacingMode] = useState("environment")
+    const [facingMode, setFacingMode] = useState("user")
     const [cameraOpen, setCameraOpen] = useState(false)
     const [countdown, setCountdown] = useState(null)
     const [flash, setFlash] = useState(false)
