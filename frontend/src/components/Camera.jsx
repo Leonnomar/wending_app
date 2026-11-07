@@ -101,7 +101,9 @@ export default function Camera() {
     async function startCamera(mode = facingMode){
         try{
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: mode },
+                video: { 
+                    facingMode: { ideal: mode }
+                },
                 audio: true
             })
 
@@ -109,6 +111,7 @@ export default function Camera() {
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream
+                await videoRef.current.play()
             }
         } catch (error) {
             console.error("Error al abrir la cámara:", error)
@@ -128,7 +131,7 @@ export default function Camera() {
         }
     }
 
-    async function switchCamera() {
+    function switchCamera() {
         if (recording) {
             alert("Detén la grabación antes de cambiar la cámara.")
             return
@@ -138,10 +141,29 @@ export default function Camera() {
             ? "user"
             : "environment"
 
-        stopCamera()
         setFacingMode(newMode)
-        await startCamera(newMode)
     }
+
+    useEffect(() => {
+        if (!cameraOpen) return
+
+        let cancelled = false
+
+        async function openCamera() {
+            await startCamera(facingMode)
+
+            if (cancelled) {
+                stopCamera()
+            }
+        }
+
+        openCamera()
+
+        return () => {
+            cancelled = true
+            stopCamera()
+        }
+    }, [cameraOpen, facingMode])
 
     function showPreview(file, mediaType) {
         const url = URL.createObjectURL(file)
@@ -406,10 +428,7 @@ export default function Camera() {
                     }}
                 >
                     <button
-                        onClick={() => {
-                            setCameraOpen(true)
-                            startCamera()
-                        }}
+                        onClick={() => setCameraOpen(true) }
                         style={buttonStyle}        
                     >
                         📸
