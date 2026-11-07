@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import Slideshow from "./Slideshow"
 import { supabase } from "../supabase"
 import { colors } from "../colors"
@@ -99,7 +99,7 @@ export default function Camera() {
         }
     }
 
-    async function startCamera(mode = facingMode) {
+    const startCamera = useCallback(async (mode) => {
         const requestId = ++cameraRequestRef.current
 
         try {
@@ -121,13 +121,6 @@ export default function Camera() {
 
             streamRef.current = stream
 
-            console.log(
-                "Cámara solicitada:",
-                mode,
-                "Cámara obtenida:",
-                stream.getVideoTracks()[0].getSettings()
-            )
-
             if (videoRef.current) {
                 videoRef.current.srcObject = stream
                 await videoRef.current.play()
@@ -136,16 +129,15 @@ export default function Camera() {
             if (requestId !== cameraRequestRef.current) return
 
             console.error("Error al abrir la cámara:", error)
-
             alert(
                 `No se pudo abrir la cámara: ${error.name}. Revisa los permisos o la disponibilidad de la cámara`
             )
 
             setCameraOpen(false)
         }
-    }
+    }, [])
 
-    function stopCamera() {
+    const stopCamera = useCallback(() => {
         cameraRequestRef.current++
 
         if (streamRef.current) {
@@ -156,25 +148,17 @@ export default function Camera() {
         if (videoRef.current) {
             videoRef.current.srcObject = null
         }
-    }
+    }, [])
 
-    async function switchCamera() {
+    function switchCamera() {
         if (recording) {
             alert("Detén la grabación antes de cambiar la cámara.")
             return
         }
 
-        const newMode = facingMode === "user"
-            ? "environment"
-            : "user"
-
-        console.log("Solicitando cambio a:", newMode)
-
-        setFacingMode(newMode)
-
-        stopCamera()
-
-        await startCamera(newMode)
+        setFacingMode(current =>
+            current === "user" ? "environment" : "user"
+        )
     }
 
     useEffect(() => {
@@ -185,7 +169,7 @@ export default function Camera() {
         return () => {
             stopCamera()
         }
-    }, [cameraOpen])
+    }, [cameraOpen, facingMode, startCamera, stopCamera])
 
     function showPreview(file, mediaType) {
         const url = URL.createObjectURL(file)
