@@ -121,6 +121,13 @@ export default function Camera() {
 
             streamRef.current = stream
 
+            console.log(
+                "Cámara solicitada:",
+                mode,
+                "Cámara obtenida:",
+                stream.getVideoTracks()[0].getSettings()
+            )
+
             if (videoRef.current) {
                 videoRef.current.srcObject = stream
                 await videoRef.current.play()
@@ -157,9 +164,13 @@ export default function Camera() {
             return
         }
 
-        setFacingMode(current =>
-            current === "environment" ? "user" : "environment"
-        )
+        setFacingMode(current => {
+            const newMode = current === "user" ? "environment" : "user"
+
+            console.log("Cambiando cámara:", current, "->", newMode)
+
+            return newMode
+        })
     }
 
     useEffect(() => {
