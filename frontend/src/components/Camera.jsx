@@ -10,6 +10,7 @@ export default function Camera() {
     const mediaRecorderRef = useRef(null)
     const chunksRef = useRef([])
     const streamRef = useRef(null)
+    const cameraRequestRef = useRef(0)
     const timerRef = useRef(null)
     const stopTimeoutRef = useRef(null)
 
@@ -98,14 +99,25 @@ export default function Camera() {
         }
     }
 
-    async function startCamera(mode = facingMode){
-        try{
+    async function startCamera(mode = facingMode) {
+        const requestId = ++cameraRequestRef.current
+
+        try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { 
-                    facingMode: { ideal: mode }
+                    facingMode: { exact: mode }
                 },
                 audio: true
             })
+
+            if (requestId !== cameraRequestRef.current) {
+                stream.getTracks().forEach(track => track.stop())
+                return
+            }
+
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+            }
 
             streamRef.current = stream
 
@@ -114,13 +126,21 @@ export default function Camera() {
                 await videoRef.current.play()
             }
         } catch (error) {
+            if (requestId !== cameraRequestRef.current) return
+
             console.error("Error al abrir la cámara:", error)
-            alert("No se pudo abrir la cámara o el micrófono. Revisa los permisos del navegador.")
+
+            alert(
+                `No se pudo abrir la cámara: ${error.name}. Revisa los permisos o la disponibilidad de la cámara`
+            )
+
             setCameraOpen(false)
         }
     }
 
     function stopCamera() {
+        cameraRequestRef.current++
+
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop())
             streamRef.current = null
@@ -137,30 +157,17 @@ export default function Camera() {
             return
         }
 
-        const newMode = facingMode === "environment"
-            ? "user"
-            : "environment"
-
-        setFacingMode(newMode)
+        setFacingMode(current =>
+            current === "environment" ? "user" : "environment"
+        )
     }
 
     useEffect(() => {
         if (!cameraOpen) return
 
-        let cancelled = false
-
-        async function openCamera() {
-            await startCamera(facingMode)
-
-            if (cancelled) {
-                stopCamera()
-            }
-        }
-
-        openCamera()
+        startCamera(facingMode)
 
         return () => {
-            cancelled = true
             stopCamera()
         }
     }, [cameraOpen, facingMode])
