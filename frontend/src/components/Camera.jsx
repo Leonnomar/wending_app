@@ -16,6 +16,7 @@ export default function Camera() {
 
     const [facingMode, setFacingMode] = useState("user")
     const [cameraOpen, setCameraOpen] = useState(false)
+    const [cameraDeviceId, setCameraDeviceId] = useState(null)
     const [countdown, setCountdown] = useState(null)
     const [flash, setFlash] = useState(false)
     const [recording, setRecording] = useState(false)
@@ -99,54 +100,14 @@ export default function Camera() {
         }
     }
     
-    const startCamera = useCallback(async (mode) => {
+    const startCamera = useCallback(async (deviceId, mode) => {
         const requestId = ++cameraRequestRef.current
 
         try {
-            // 1. Solicitar permiso para acceder a la cámara
-            const permissionStream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            })
+            const videoConstraints = deviceId
+                ? { deviceId: { exact: deviceId } }
+                : { facingMode: { ideal: mode } }
 
-            if (requestId !== cameraRequestRef.current) {
-                permissionStream.getTracks().forEach(track => track.stop())
-                return
-            }
-
-            // Liberar la cámara temporal
-            permissionStream.getTracks().forEach(track => track.stop())
-
-            // 2. Ahora sí, identificar las cámaras disponibles
-            const devices = await navigator.mediaDevices.enumerateDevices()
-
-            const cameras = devices.filter(
-                device => device.kind === "videoinput"
-            )
-
-            // 3. Identificar frontal o trasera por su etiqueta
-            const patterns = mode === "environment"
-                ? /back|rear|environment|trasera|trasero|posterior|world/i
-                : /front|user|facetime|frontal|delantera/i
-
-            const selectedCamera = cameras.find(camera =>
-                patterns.test(camera.label)
-            )
-
-            // 4. Seleccionar el dispositivo identificado
-            const videoConstraints = selectedCamera
-                ? {
-                    deviceId: {
-                        exact: selectedCamera.deviceId
-                    }
-                }
-                : {
-                    facingMode: {
-                        exact: mode
-                    }
-                }
-
-            // 5. Abrir la cámara seleccionada
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: videoConstraints,
                 audio: true
@@ -171,16 +132,13 @@ export default function Camera() {
         } catch (error) {
             if (requestId !== cameraRequestRef.current) return
 
-            console.error("Error al abrir la cámara:", error)
+            console.error("Error al abrir cámara:", error)
 
-            alert(
-                `No se pudo abrir la cámara: ${error.name}. Revisa los permisos o la disponibilidad de la cámara.`
-            )
+            alert(`No se pudo abrir la cámara: ${error.name}`)
 
             setCameraOpen(false)
         }
     }, [])
-
 
     const stopCamera = useCallback(() => {
         cameraRequestRef.current++
@@ -195,26 +153,66 @@ export default function Camera() {
         }
     }, [])
 
-    function switchCamera() {
-        if (recording) {
+    async function switchCamera() {
+        if (recording || busy) {
             alert("Detén la grabación antes de cambiar la cámara.")
             return
         }
 
-        setFacingMode(current =>
-            current === "user" ? "environment" : "user"
-        )
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices()
+
+            const cameras = devices.filter(
+                device => device.kind === "videoinput"
+            )
+
+            const currentTrack = streamRef.current?.getVideoTracks()[0]
+
+            const currentDeviceId = currentTrack?.getSettings().deviceId
+
+            if (cameras.length < 2) {
+                alert("El navegador solamente está detectando una cámara.")
+                return
+            }
+
+            const currentIndex = cameras.findIndex(
+                camera => camera.deviceId === currentDeviceId
+            )
+
+            const nextIndex = currentIndex < 0
+                ? 1
+                : (currentIndex + 1) % cameras.length
+
+            const nextCamera = cameras[nextIndex]
+
+            if (!nextCamera?.deviceId) {
+                alert("No se pudo identificar la siguiente cámara.")
+                return
+            }
+
+            stopCamera()
+
+            setFacingMode(current =>
+                current === "user" ? "environment" : "user"
+            )
+
+            setCameraDeviceId(nextCamera.deviceId)
+
+        } catch (error) {
+            console.error("Error al cambiar de cámara:", error)
+            alert("No se pudo cambiar de cámara.")
+        }
     }
 
     useEffect(() => {
         if (!cameraOpen) return
 
-        startCamera(facingMode)
+        startCamera(cameraDeviceId, facingMode)
 
         return () => {
             stopCamera()
         }
-    }, [cameraOpen, facingMode, startCamera, stopCamera])
+    }, [cameraOpen, cameraDeviceId, facingMode, startCamera, stopCamera])
 
     function showPreview(file, mediaType) {
         const url = URL.createObjectURL(file)
