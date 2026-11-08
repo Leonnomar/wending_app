@@ -17,6 +17,7 @@ export default function Camera() {
     const [facingMode, setFacingMode] = useState("user")
     const [cameraOpen, setCameraOpen] = useState(false)
     const [cameraDeviceId, setCameraDeviceId] = useState(null)
+    const [availableCameras, setAvailableCameras] = useState([])
     const [countdown, setCountdown] = useState(null)
     const [flash, setFlash] = useState(false)
     const [recording, setRecording] = useState(false)
@@ -129,6 +130,14 @@ export default function Camera() {
                 await videoRef.current.play()
             }
 
+            const devices = await navigator.mediaDevices.enumerateDevices()
+
+            const cameras = devices.filter(
+                device => device.kind === "videoinput"
+            )
+
+            setAvailableCameras(cameras)
+
         } catch (error) {
             if (requestId !== cameraRequestRef.current) return
 
@@ -166,41 +175,43 @@ export default function Camera() {
                 device => device.kind === "videoinput"
             )
 
-            const currentTrack = streamRef.current?.getVideoTracks()[0]
-
-            const currentDeviceId = currentTrack?.getSettings().deviceId
+            setAvailableCameras(cameras)
 
             if (cameras.length < 2) {
-                alert("El navegador solamente está detectando una cámara.")
+                alert(`El navegador detecta ${cameras.length} cámara(s)`)
                 return
             }
+
+            const currentDeviceId =
+                streamRef.current
+                    ?.getVideoTracks()[0]
+                    ?.getSettings()
+                    .deviceId
 
             const currentIndex = cameras.findIndex(
                 camera => camera.deviceId === currentDeviceId
             )
 
             const nextIndex = currentIndex < 0
-                ? 1
+                ? 0
                 : (currentIndex + 1) % cameras.length
 
             const nextCamera = cameras[nextIndex]
 
             if (!nextCamera?.deviceId) {
-                alert("No se pudo identificar la siguiente cámara.")
+                alert("El navegador no proporcionó el identificador de esta cámara.")
                 return
             }
 
-            stopCamera()
+            const isFront = /front|user|facetime|frontal|delantera/i
+                .test(nextCamera.label)
 
-            setFacingMode(current =>
-                current === "user" ? "environment" : "user"
-            )
-
+            setFacingMode(isFront ? "user" : "environment")
             setCameraDeviceId(nextCamera.deviceId)
 
         } catch (error) {
             console.error("Error al cambiar de cámara:", error)
-            alert("No se pudo cambiar de cámara.")
+            alert(`Error al cambiar de cámara: ${error.message}`)
         }
     }
 
@@ -506,6 +517,38 @@ export default function Camera() {
                     >
                         🔄
                     </button>
+                    
+                    <div
+                        style={{
+                            position: "fixed",
+                            left: "20px",
+                            bottom: "90px",
+                            zIndex: 9999,
+                            background: "rgba(0,0,0,0.85)",
+                            color: "white",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            fontSize: "12px",
+                            maxWidth: "260px"
+                        }}
+                    >
+                        <strong>
+                            Cámaras detectadas: {availableCameras.length}
+                        </strong>
+
+                        {availableCameras.map((camera, index) => {
+                            const activeId = streamRef.current
+                                ?.getVideoTracks()[0]
+                                ?.getSettings().deviceId
+
+                            return (
+                                <div key={camera.deviceId || index} style={{ marginTop: "6px" }}>
+                                    {camera.label || `Cámara ${index + 1}`}
+                                    {camera.deviceId === activeId ? " ✓ ACTIVA" : ""}
+                                </div>
+                            )
+                        })}
+                    </div>
 
                     <div
                         style={{
