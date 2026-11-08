@@ -98,35 +98,42 @@ export default function Camera() {
             setBusy(false)
         }
     }
-
     
     const startCamera = useCallback(async (mode) => {
         const requestId = ++cameraRequestRef.current
 
         try {
-            // Identificar las cámaras disponibles
+            // 1. Solicitar permiso para acceder a la cámara
+            const permissionStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            })
+
+            if (requestId !== cameraRequestRef.current) {
+                permissionStream.getTracks().forEach(track => track.stop())
+                return
+            }
+
+            // Liberar la cámara temporal
+            permissionStream.getTracks().forEach(track => track.stop())
+
+            // 2. Ahora sí, identificar las cámaras disponibles
             const devices = await navigator.mediaDevices.enumerateDevices()
 
             const cameras = devices.filter(
                 device => device.kind === "videoinput"
             )
 
-            console.log("Cámaras disponibles:", cameras)
-
-            // Buscar la cámara según el modo solicitado
-            const cameraPattern = mode === "environment"
-                ? /back|rear|environment|trasera|trasero|posterior/i
+            // 3. Identificar frontal o trasera por su etiqueta
+            const patterns = mode === "environment"
+                ? /back|rear|environment|trasera|trasero|posterior|world/i
                 : /front|user|facetime|frontal|delantera/i
 
             const selectedCamera = cameras.find(camera =>
-                cameraPattern.test(camera.label)
+                patterns.test(camera.label)
             )
 
-            console.log("Modo solicitado:", mode)
-            console.log("Dispositivo seleccionado:", selectedCamera?.label)
-
-            // Seleccionar por deviceId cuando sea posible.
-            // Si no hay etiquetas disponibles, utilizar facingMode.
+            // 4. Seleccionar el dispositivo identificado
             const videoConstraints = selectedCamera
                 ? {
                     deviceId: {
@@ -139,6 +146,7 @@ export default function Camera() {
                     }
                 }
 
+            // 5. Abrir la cámara seleccionada
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: videoConstraints,
                 audio: true
