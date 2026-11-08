@@ -99,14 +99,48 @@ export default function Camera() {
         }
     }
 
+    
     const startCamera = useCallback(async (mode) => {
         const requestId = ++cameraRequestRef.current
 
         try {
+            // Identificar las cámaras disponibles
+            const devices = await navigator.mediaDevices.enumerateDevices()
+
+            const cameras = devices.filter(
+                device => device.kind === "videoinput"
+            )
+
+            console.log("Cámaras disponibles:", cameras)
+
+            // Buscar la cámara según el modo solicitado
+            const cameraPattern = mode === "environment"
+                ? /back|rear|environment|trasera|trasero|posterior/i
+                : /front|user|facetime|frontal|delantera/i
+
+            const selectedCamera = cameras.find(camera =>
+                cameraPattern.test(camera.label)
+            )
+
+            console.log("Modo solicitado:", mode)
+            console.log("Dispositivo seleccionado:", selectedCamera?.label)
+
+            // Seleccionar por deviceId cuando sea posible.
+            // Si no hay etiquetas disponibles, utilizar facingMode.
+            const videoConstraints = selectedCamera
+                ? {
+                    deviceId: {
+                        exact: selectedCamera.deviceId
+                    }
+                }
+                : {
+                    facingMode: {
+                        exact: mode
+                    }
+                }
+
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: { exact: mode }
-                },
+                video: videoConstraints,
                 audio: true
             })
 
@@ -125,17 +159,20 @@ export default function Camera() {
                 videoRef.current.srcObject = stream
                 await videoRef.current.play()
             }
+
         } catch (error) {
             if (requestId !== cameraRequestRef.current) return
 
             console.error("Error al abrir la cámara:", error)
+
             alert(
-                `No se pudo abrir la cámara: ${error.name}. Revisa los permisos o la disponibilidad de la cámara`
+                `No se pudo abrir la cámara: ${error.name}. Revisa los permisos o la disponibilidad de la cámara.`
             )
 
             setCameraOpen(false)
         }
     }, [])
+
 
     const stopCamera = useCallback(() => {
         cameraRequestRef.current++
