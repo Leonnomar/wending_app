@@ -507,17 +507,17 @@ export default function Camera() {
                 <>
                     <button
                         type="button"
-                        onClick={() => alert("EL BOTÓN SÍ RESPONDE")}
+                        onClick={switchCamera}
+                        disabled={recording || busy}
                         style={{
                             ...buttonStyle,
                             position: "fixed",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
+                            top: "110px",
+                            left: "20px",
                             zIndex: 9999,
                             pointerEvents: "auto",
-                            fontSize: "25px",
-                            padding: "20px"
+                            fontSize: "22px",
+                            padding: "14px 18px"
                         }}
                     >
                         🔄
