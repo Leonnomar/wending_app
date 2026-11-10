@@ -17,7 +17,6 @@ export default function Camera() {
     const [facingMode, setFacingMode] = useState("user")
     const [cameraOpen, setCameraOpen] = useState(false)
     const [cameraDeviceId, setCameraDeviceId] = useState(null)
-    const [availableCameras, setAvailableCameras] = useState([])
     const [countdown, setCountdown] = useState(null)
     const [flash, setFlash] = useState(false)
     const [recording, setRecording] = useState(false)
@@ -130,14 +129,6 @@ export default function Camera() {
                 await videoRef.current.play()
             }
 
-            const devices = await navigator.mediaDevices.enumerateDevices()
-
-            const cameras = devices.filter(
-                device => device.kind === "videoinput"
-            )
-
-            setAvailableCameras(cameras)
-
         } catch (error) {
             if (requestId !== cameraRequestRef.current) return
 
@@ -174,8 +165,6 @@ export default function Camera() {
             const cameras = devices.filter(
                 device => device.kind === "videoinput"
             )
-
-            setAvailableCameras(cameras)
 
             if (cameras.length < 2) {
                 alert(`El navegador detecta ${cameras.length} cámara(s)`)
@@ -512,7 +501,7 @@ export default function Camera() {
                             ...buttonStyle,
                             position: "fixed",
                             left: "20px",
-                            bottom: "125px",
+                            top: "20px",
                             zIndex: 99999,
                             pointerEvents: "auto",
                             fontSize: "22px",
@@ -521,38 +510,6 @@ export default function Camera() {
                     >
                         🔄
                     </button>
-                    
-                    <div
-                        style={{
-                            position: "fixed",
-                            left: "20px",
-                            bottom: "90px",
-                            zIndex: 9999,
-                            background: "rgba(0,0,0,0.85)",
-                            color: "white",
-                            padding: "12px",
-                            borderRadius: "10px",
-                            fontSize: "12px",
-                            maxWidth: "260px"
-                        }}
-                    >
-                        <strong>
-                            Cámaras detectadas: {availableCameras.length}
-                        </strong>
-
-                        {availableCameras.map((camera, index) => {
-                            const activeId = streamRef.current
-                                ?.getVideoTracks()[0]
-                                ?.getSettings().deviceId
-
-                            return (
-                                <div key={camera.deviceId || index} style={{ marginTop: "6px" }}>
-                                    {camera.label || `Cámara ${index + 1}`}
-                                    {camera.deviceId === activeId ? " ✓ ACTIVA" : ""}
-                                </div>
-                            )
-                        })}
-                    </div>
 
                     <div
                         style={{
