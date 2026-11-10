@@ -506,7 +506,7 @@ export default function Camera() {
             ) : (
                 <>
                     <button 
-                        onClick={switchCamera}
+                        onClick={() => alert("EL BOTÓN SÍ RESPONDE")}
                         disabled={recording || busy}
                         style={{
                             ...buttonStyle,
