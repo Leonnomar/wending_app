@@ -163,7 +163,6 @@ export default function Camera() {
     }, [])
 
     async function switchCamera() {
-        alert("El botón de cambiar cámara sí se ejcutó")
         if (recording || busy) {
             alert("Detén la grabación antes de cambiar la cámara.")
             return
@@ -512,9 +511,9 @@ export default function Camera() {
                         style={{
                             ...buttonStyle,
                             position: "fixed",
-                            top: "110px",
                             left: "20px",
-                            zIndex: 9999,
+                            bottom: "125px",
+                            zIndex: 99999,
                             pointerEvents: "auto",
                             fontSize: "22px",
                             padding: "14px 18px"
