@@ -601,7 +601,8 @@ export default function Camera() {
                             objectFit:"cover",
                             transform: facingMode === "user" ? "scaleX(-1)" : "none",
                             background: "#000",
-                            zIndex: 9000
+                            zIndex: 9000,
+                            pointerEvents: "none"
                         }}
                     />
 
