@@ -505,15 +505,19 @@ export default function Camera() {
                 </div>
             ) : (
                 <>
-                    <button 
+                    <button
+                        type="button"
                         onClick={() => alert("EL BOTÓN SÍ RESPONDE")}
-                        disabled={recording || busy}
                         style={{
                             ...buttonStyle,
                             position: "fixed",
-                            left: "20px",
-                            bottom: "30px",
-                            zIndex: 9999
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            zIndex: 9999,
+                            pointerEvents: "auto",
+                            fontSize: "25px",
+                            padding: "20px"
                         }}
                     >
                         🔄
